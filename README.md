@@ -9,3 +9,4 @@ This is currently work in progress and this list collects open TODOs and other t
 - Separate primitives into individual modules
 - Error handling
 - Serialization and deserialization
+- Code documentation
