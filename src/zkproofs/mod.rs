@@ -159,7 +159,7 @@ impl<RNG: RngCore + CryptoRng> ProofSystem<RNG, DlogEqStatement<'_>, DlogEqWitne
             None => return None,
         };
 
-        let ch = DlogEq::<RNG>::challenge(statement, &com, rng); // replace with RO challenge generation
+        let ch = DlogEq::<RNG>::challenge(statement, &com, rng); // TODO replace with RO challenge generation and drop challenge from proof
 
         let rsp = DlogEq::<RNG>::response(statement, witness, &ch, &st);
 
@@ -174,7 +174,7 @@ impl<RNG: RngCore + CryptoRng> ProofSystem<RNG, DlogEqStatement<'_>, DlogEqWitne
         DlogEq::<RNG>::check(
             statement,
             &proof.commitment,
-            &proof.challenge,
+            &proof.challenge, // TODO drop challenge from proof and recompute here
             &proof.response,
         )
     }
