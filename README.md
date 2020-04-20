@@ -5,6 +5,7 @@ This is a Rust implementation of fully collision resistant chameleon hash from [
 
 This is currently work in progress and this list collects open TODOs and other things which came to mind during implementation.
 
+- Wrap base point s.t. no direct access to ristretto required
 - Abstract out groups
 - Separate primitives into individual modules
 - Error handling
