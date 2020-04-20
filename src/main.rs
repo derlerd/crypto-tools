@@ -31,7 +31,7 @@ fn main() {
 
     let p = DlogEqWithThreadRng::prove(&x, &w, &mut thread_rng());
 
-    let success = DlogEqWithThreadRng::verify(&x, &p.unwrap());
+    let success = DlogEqWithThreadRng::verify(&x, p.unwrap());
 
     println!("{:?}", success);
 }
