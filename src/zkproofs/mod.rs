@@ -75,34 +75,54 @@ pub trait SigmaProtocol<'a, RNG> {
     type CH;
     type RSP;
 
-    fn commit(statement: &Self::S, witness: &Self::W, rng: &mut RNG) -> Option<(Self::COM, Self::ST)>;
+    fn commit(
+        statement: &Self::S,
+        witness: &Self::W,
+        rng: &mut RNG,
+    ) -> Option<(Self::COM, Self::ST)>;
     fn challenge(statement: &Self::S, commitment: &Self::COM, rng: &mut RNG) -> Self::CH;
-    fn response(statement: &Self::S, witness: &Self::W, challenge: &Self::CH, state: &Self::ST) -> Self::RSP;
-    fn check(statement: &Self::S, commitment: &Self::COM, challenge: &Self::CH, response: &Self::RSP) -> bool;
+    fn response(
+        statement: &Self::S,
+        witness: &Self::W,
+        challenge: &Self::CH,
+        state: &Self::ST,
+    ) -> Self::RSP;
+    fn check(
+        statement: &Self::S,
+        commitment: &Self::COM,
+        challenge: &Self::CH,
+        response: &Self::RSP,
+    ) -> bool;
 }
 
-pub trait FiatShamirConvertibleSigmaProtocol<'a, RNG, SP : SigmaProtocol<'a, RNG>> {
+pub trait FiatShamirConvertibleSigmaProtocol<'a, RNG, SP: SigmaProtocol<'a, RNG>> {
     type P;
 
-    fn compile_proof(commitment : SP::COM, challenge : SP::CH, response : SP::RSP) -> Self::P;
-    fn unwrap_proof(proof : Self::P) -> (SP::COM, SP::CH, SP::RSP);
+    fn compile_proof(commitment: SP::COM, challenge: SP::CH, response: SP::RSP) -> Self::P;
+    fn unwrap_proof(proof: Self::P) -> (SP::COM, SP::CH, SP::RSP);
 }
 
 impl<RNG: RngCore + CryptoRng> FiatShamirConvertibleSigmaProtocol<'_, RNG, Self> for DlogEq<RNG> {
-    type P = DlogEqProof; 
+    type P = DlogEqProof;
 
-    fn compile_proof(commitment : DlogEqCommitment, challenge : DlogEqChallenge, response : DlogEqResponse) -> DlogEqProof {
-      DlogEqProof { commitment : commitment, challenge : challenge, response : response }
+    fn compile_proof(
+        commitment: DlogEqCommitment,
+        challenge: DlogEqChallenge,
+        response: DlogEqResponse,
+    ) -> DlogEqProof {
+        DlogEqProof {
+            commitment: commitment,
+            challenge: challenge,
+            response: response,
+        }
     }
 
-    fn unwrap_proof(proof : DlogEqProof) -> (DlogEqCommitment, DlogEqChallenge, DlogEqResponse) {
+    fn unwrap_proof(proof: DlogEqProof) -> (DlogEqCommitment, DlogEqChallenge, DlogEqResponse) {
         (proof.commitment, proof.challenge, proof.response)
     }
 }
 
-impl<'a, RNG: RngCore + CryptoRng>
-    SigmaProtocol<'a, RNG> for DlogEq<RNG>
-{
+impl<'a, RNG: RngCore + CryptoRng> SigmaProtocol<'a, RNG> for DlogEq<RNG> {
     type S = DlogEqStatement<'a>;
     type W = DlogEqWitness<'a>;
     type COM = DlogEqCommitment;
@@ -175,18 +195,17 @@ pub trait ProofSystem<'a, RNG> {
     fn verify(statement: &Self::S, proof: Self::P) -> bool;
 }
 
-impl<'a, RNG: RngCore + CryptoRng, SP : SigmaProtocol<'a, RNG> + FiatShamirConvertibleSigmaProtocol<'a, RNG, SP>> ProofSystem<'a, RNG>
-    for SP
+impl<
+        'a,
+        RNG: RngCore + CryptoRng,
+        SP: SigmaProtocol<'a, RNG> + FiatShamirConvertibleSigmaProtocol<'a, RNG, SP>,
+    > ProofSystem<'a, RNG> for SP
 {
     type S = SP::S;
     type W = SP::W;
     type P = SP::P;
 
-    fn prove(
-        statement: &Self::S,
-        witness: &Self::W,
-        rng: &mut RNG,
-    ) -> Option<Self::P> {
+    fn prove(statement: &Self::S, witness: &Self::W, rng: &mut RNG) -> Option<Self::P> {
         let (com, st) = match SP::commit(statement, witness, rng) {
             Some((com, st)) => (com, st),
             None => return None,
