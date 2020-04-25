@@ -100,7 +100,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for DlogEq<RNG>
         commitment: &DlogEqCommitment,
         rng: &mut RNG,
     ) -> DlogEqChallenge {
-        DlogEqChallenge(Scalar::one()) // TODO replace this with hash of challenge
+        panic!("Challenge generation not properly implemented yet - this means that the protocol is insecure!");
     }
 
     fn response(

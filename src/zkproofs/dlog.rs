@@ -91,7 +91,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
         commitment: &DlogCommitment,
         rng: &mut RNG,
     ) -> DlogChallenge {
-        DlogChallenge(Scalar::one()) // TODO replace this with hash of challenge
+        panic!("Challenge generation not properly implemented yet!");
     }
 
     fn response(
