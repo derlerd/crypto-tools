@@ -1,5 +1,6 @@
 mod encryption;
 mod zkproofs;
+mod hashing;
 
 use rand::thread_rng;
 use sha2::Sha512;
