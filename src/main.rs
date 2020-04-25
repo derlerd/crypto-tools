@@ -6,7 +6,8 @@ use sha2::Sha512;
 
 use curve25519_dalek::scalar::Scalar;
 
-use crate::encryption::{ElGamalMessage, ElGamalWithThreadRng, EncryptionScheme};
+use crate::encryption::EncryptionScheme;
+use crate::encryption::elgamal::{ElGamalMessage, ElGamalWithThreadRng};
 use crate::zkproofs::ProofSystem;
 use crate::zkproofs::dlogeq::{DlogEqStatement, DlogEqWithThreadRng, DlogEqWitness};
 use crate::zkproofs::dlog::{DlogStatement, DlogWithThreadRng, DlogWitness};
