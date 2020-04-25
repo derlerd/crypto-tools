@@ -6,6 +6,10 @@ use rand::{CryptoRng, RngCore};
 
 use std::marker::PhantomData;
 
+use sha2::Sha512;
+use digest::Digest;
+use crate::hashing::{ DomainSeparator, DomainSeparatedHash, Hashable };
+
 pub struct DlogEq<RNG: RngCore + CryptoRng> {
     phantom_rng: PhantomData<RNG>,
 }
@@ -62,6 +66,22 @@ impl<'a> DlogEqStatement<'a> {
     }
 }
 
+impl<DIG : Digest> Hashable<DIG> for DlogEqStatement<'_> {
+  fn hash(&self, state : &mut DIG) {
+    state.input(self.g_1.compress().as_bytes());
+    state.input(self.h_1.compress().as_bytes());
+    state.input(self.g_2.compress().as_bytes());
+    state.input(self.h_2.compress().as_bytes());
+  }
+}
+
+impl<DIG : Digest> Hashable<DIG> for DlogEqCommitment {
+   fn hash(&self, state : &mut DIG) {
+    state.input(self.c1.compress().as_bytes());
+    state.input(self.c2.compress().as_bytes());
+  } 
+}
+
 impl<'a> DlogEqWitness<'a> {
     pub fn new(x: &'a Scalar) -> Self {
         DlogEqWitness { x: x }
@@ -96,11 +116,9 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for DlogEq<RNG>
     }
 
     fn challenge(
-        statement: &DlogEqStatement,
-        commitment: &DlogEqCommitment,
-        rng: &mut RNG,
+        rng: &mut RNG
     ) -> DlogEqChallenge {
-        panic!("Challenge generation not properly implemented yet - this means that the protocol is insecure!");
+        DlogEqChallenge(Scalar::random(rng))
     }
 
     fn response(
@@ -134,6 +152,14 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for DlogEq<RNG>
 
 impl<RNG: RngCore + CryptoRng> super::FiatShamirConvertibleSigmaProtocol<'_, RNG, Self> for DlogEq<RNG> {
     type P = DlogEqProof;
+    
+    fn hash_challenge(statement : &DlogEqStatement, commitment : &DlogEqCommitment) -> DlogEqChallenge {
+        let dom_sep = DomainSeparator::from_string("dlogeq".to_string());
+        let mut h = DomainSeparatedHash::<Sha512>::new(dom_sep);
+        statement.hash(&mut h);
+        commitment.hash(&mut h);
+        DlogEqChallenge(Scalar::from_hash(h))
+    }
 
     fn compile_proof(
         commitment: DlogEqCommitment,

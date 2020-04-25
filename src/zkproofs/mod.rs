@@ -16,7 +16,7 @@ pub trait SigmaProtocol<'a, RNG> {
         witness: &Self::W,
         rng: &mut RNG,
     ) -> Option<(Self::COM, Self::ST)>;
-    fn challenge(statement: &Self::S, commitment: &Self::COM, rng: &mut RNG) -> Self::CH;
+    fn challenge(rng: &mut RNG) -> Self::CH;
     fn response(
         statement: &Self::S,
         witness: &Self::W,
@@ -34,6 +34,7 @@ pub trait SigmaProtocol<'a, RNG> {
 pub trait FiatShamirConvertibleSigmaProtocol<'a, RNG, SP: SigmaProtocol<'a, RNG>> {
     type P;
 
+    fn hash_challenge(statement : &SP::S, commitment : &SP::COM) -> SP::CH;
     fn compile_proof(commitment: SP::COM, challenge: SP::CH, response: SP::RSP) -> Self::P;
     fn unwrap_proof(proof: Self::P) -> (SP::COM, SP::CH, SP::RSP);
 }
@@ -63,7 +64,7 @@ impl<
             None => return None,
         };
 
-        let ch = SP::challenge(statement, &com, rng); // TODO replace with RO challenge generation and drop challenge from proof
+        let ch = SP::hash_challenge(statement, &com); // TODO replace with RO challenge generation and drop challenge from proof
 
         let rsp = SP::response(statement, witness, &ch, &st);
 
