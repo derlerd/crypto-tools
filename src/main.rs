@@ -7,7 +7,9 @@ use sha2::Sha512;
 use curve25519_dalek::scalar::Scalar;
 
 use crate::encryption::{ElGamalMessage, ElGamalWithThreadRng, EncryptionScheme};
-use crate::zkproofs::{DlogEqStatement, DlogEqWithThreadRng, DlogEqWitness, ProofSystem};
+use crate::zkproofs::ProofSystem;
+use crate::zkproofs::dlogeq::{DlogEqStatement, DlogEqWithThreadRng, DlogEqWitness};
+use crate::zkproofs::dlog::{DlogStatement, DlogWithThreadRng, DlogWitness};
 
 fn main() {
     let (sk, pk) = ElGamalWithThreadRng::key_gen(32, &mut thread_rng()).unwrap();
@@ -32,6 +34,15 @@ fn main() {
     let p = DlogEqWithThreadRng::prove(&x, &w, &mut thread_rng());
 
     let success = DlogEqWithThreadRng::verify(&x, p.unwrap());
+
+    println!("{:?}", success);
+
+    let x = DlogStatement::new(&g_1, &h_1);
+    let w = DlogWitness::new(&s_2);
+
+    let p = DlogWithThreadRng::prove(&x, &w, &mut thread_rng());
+
+    let success = DlogWithThreadRng::verify(&x, p.unwrap());
 
     println!("{:?}", success);
 }
