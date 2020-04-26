@@ -12,6 +12,7 @@ pub trait SigmaProtocol<'a, RNG> {
     type ST;
     type CH;
     type RSP;
+    type STS;
 
     fn commit(
         statement: &Self::S,
@@ -31,8 +32,7 @@ pub trait SigmaProtocol<'a, RNG> {
         challenge: &Self::CH,
         response: &Self::RSP,
     ) -> bool;
-    fn simulate(statement: &Self::S, challenge: &Self::CH, rng: &mut RNG)
-        -> (Self::COM, Self::RSP);
+    fn simulate(statement: &Self::S, rng: &mut RNG) -> (Self::COM, Self::STS);
 }
 
 pub trait FsConvertibleSigmaProtocol<'a, RNG, SP: SigmaProtocol<'a, RNG>> {
@@ -53,6 +53,13 @@ pub struct OrComposedSigmaProtocol<'a, RNG, P1: SigmaProtocol<'a, RNG>, P2: Sigm
 pub enum OrComposedWitness<'a, RNG, P1: SigmaProtocol<'a, RNG>, P2: SigmaProtocol<'a, RNG>> {
     WitnessP1(P1::W),
     WitnessP2(P2::W),
+    Both((P1::W, P2::W)),
+}
+
+pub enum OrProverState<'a, RNG, P1: SigmaProtocol<'a, RNG>, P2: SigmaProtocol<'a, RNG>> {
+    SimulatedP1(P1::STS, P2::ST),
+    SimulatedP2(P1::ST, P2::STS),
+    BothHonest(P1::ST, P2::ST),
 }
 
 impl<'a, RNG: RngCore + CryptoRng, P1: SigmaProtocol<'a, RNG>, P2: SigmaProtocol<'a, RNG>>
@@ -61,28 +68,65 @@ impl<'a, RNG: RngCore + CryptoRng, P1: SigmaProtocol<'a, RNG>, P2: SigmaProtocol
     type S = (P1::S, P2::S);
     type W = OrComposedWitness<'a, RNG, P1, P2>;
     type COM = (P1::COM, P2::COM);
-    type ST = (P1::ST, P2::ST);
+    type ST = OrProverState<'a, RNG, P1, P2>;
     type CH = P1::CH;
     type RSP = (P1::RSP, P2::RSP);
+    type STS = (P1::STS, P2::STS);
 
     fn commit(
         statement: &Self::S,
         witness: &Self::W,
         rng: &mut RNG,
     ) -> Option<(Self::COM, Self::ST)> {
-        unimplemented!();
+        match witness {
+            OrComposedWitness::WitnessP1(w1) => {
+                let (c1, st1) = match P1::commit(&statement.0, &w1, rng) {
+                    Some((com, st)) => (com, st),
+                    None => return None,
+                };
+                let (c2, st2) = P2::simulate(&statement.1, rng);
+
+                Some(((c1, c2), OrProverState::SimulatedP2(st1, st2)))
+            }
+            OrComposedWitness::WitnessP2(w2) => {
+                let (c2, st2) = match P2::commit(&statement.1, &w2, rng) {
+                    Some((com, st)) => (com, st),
+                    None => return None,
+                };
+                let (c1, st1) = P1::simulate(&statement.0, rng);
+
+                Some(((c1, c2), OrProverState::SimulatedP1(st1, st2)))
+            }
+            OrComposedWitness::Both((w1, w2)) => {
+                let (c1, st1) = match P1::commit(&statement.0, &w1, rng) {
+                    Some((com, st)) => (com, st),
+                    None => return None,
+                };
+                let (c2, st2) = match P2::commit(&statement.1, &w2, rng) {
+                    Some((com, st)) => (com, st),
+                    None => return None,
+                };
+
+                Some(((c1, c2), OrProverState::BothHonest(st1, st2)))
+            }
+        }
     }
 
     fn challenge(rng: &mut RNG) -> Self::CH {
-        unimplemented!();
+        P1::challenge(rng)
     }
+
     fn response(
         statement: &Self::S,
         witness: &Self::W,
         challenge: &Self::CH,
         state: &Self::ST,
     ) -> Self::RSP {
-        unimplemented!();
+        match state {
+            OrProverState::SimulatedP1(st1, st2) => unimplemented!(),
+            OrProverState::SimulatedP2(st1, st2) => unimplemented!(),
+            OrProverState::BothHonest(st1, st2) => unimplemented!(),
+        }
     }
 
     fn check(
@@ -94,11 +138,7 @@ impl<'a, RNG: RngCore + CryptoRng, P1: SigmaProtocol<'a, RNG>, P2: SigmaProtocol
         unimplemented!();
     }
 
-    fn simulate(
-        statement: &Self::S,
-        challenge: &Self::CH,
-        rng: &mut RNG,
-    ) -> (Self::COM, Self::RSP) {
+    fn simulate(statement: &Self::S, rng: &mut RNG) -> (Self::COM, Self::STS) {
         unimplemented!();
     }
 }

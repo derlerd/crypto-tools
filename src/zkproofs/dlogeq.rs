@@ -39,6 +39,11 @@ pub struct DlogEqProof {
     response: DlogEqResponse,
 }
 
+pub struct DlogEqSimulatorState {
+    challenge: DlogEqChallenge,
+    response: DlogEqResponse,
+}
+
 impl<'a> DlogEqStatement<'a> {
     pub fn new(
         g_1: &'a RistrettoPoint,
@@ -94,6 +99,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for DlogEq<RNG>
     type ST = DlogEqProverState;
     type CH = DlogEqChallenge;
     type RSP = DlogEqResponse;
+    type STS = DlogEqSimulatorState;
 
     fn commit(
         statement: &DlogEqStatement,
@@ -148,14 +154,20 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for DlogEq<RNG>
 
     fn simulate(
         statement: &DlogEqStatement,
-        challenge: &DlogEqChallenge,
         rng: &mut RNG,
-    ) -> (DlogEqCommitment, DlogEqResponse) {
+    ) -> (DlogEqCommitment, DlogEqSimulatorState) {
+        let ch = Scalar::random(rng);
         let rsp = Scalar::random(rng);
-        let c1 = statement.g_1 * rsp - statement.h_1 * challenge.0;
-        let c2 = statement.g_2 * rsp - statement.h_2 * challenge.0;
+        let c1 = statement.g_1 * rsp - statement.h_1 * &ch;
+        let c2 = statement.g_2 * rsp - statement.h_2 * &ch;
 
-        (DlogEqCommitment { c1: c1, c2: c2 }, DlogEqResponse(rsp))
+        (
+            DlogEqCommitment { c1: c1, c2: c2 },
+            DlogEqSimulatorState {
+                challenge: DlogEqChallenge(ch),
+                response: DlogEqResponse(rsp),
+            },
+        )
     }
 }
 

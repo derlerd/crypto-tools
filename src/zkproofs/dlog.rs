@@ -32,6 +32,11 @@ pub struct DlogProverState(Scalar);
 pub struct DlogChallenge(Scalar);
 pub struct DlogResponse(Scalar);
 
+pub struct DlogSimulatorState {
+    challenge: DlogChallenge,
+    response: DlogResponse,
+}
+
 pub struct DlogProof {
     commitment: DlogCommitment,
     response: DlogResponse,
@@ -78,6 +83,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
     type ST = DlogProverState;
     type CH = DlogChallenge;
     type RSP = DlogResponse;
+    type STS = DlogSimulatorState;
 
     fn commit(
         statement: &DlogStatement,
@@ -127,15 +133,18 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
         false
     }
 
-    fn simulate(
-        statement: &DlogStatement,
-        challenge: &DlogChallenge,
-        rng: &mut RNG,
-    ) -> (DlogCommitment, DlogResponse) {
+    fn simulate(statement: &DlogStatement, rng: &mut RNG) -> (DlogCommitment, DlogSimulatorState) {
+        let ch = Scalar::random(rng);
         let rsp = Scalar::random(rng);
-        let com = statement.g_1 * rsp - statement.h_1 * challenge.0;
+        let com = statement.g_1 * rsp - statement.h_1 * &ch;
 
-        (DlogCommitment { c1: com }, DlogResponse(rsp))
+        (
+            DlogCommitment { c1: com },
+            DlogSimulatorState {
+                challenge: DlogChallenge(ch),
+                response: DlogResponse(rsp),
+            },
+        )
     }
 }
 
