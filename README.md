@@ -11,3 +11,4 @@ This is currently work in progress and this list collects open TODOs and other t
 - Error handling
 - Serialization and deserialization
 - Code documentation
+- Make tuples with one element unnamed in dlog.rs

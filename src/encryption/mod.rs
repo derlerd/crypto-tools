@@ -2,7 +2,6 @@ pub mod elgamal;
 
 use rand::{CryptoRng, RngCore};
 
-
 pub trait SecretKey<RNG: RngCore + CryptoRng> {
     fn generate(key_len: u32, rng: &mut RNG) -> Option<Self>
     where
@@ -27,5 +26,3 @@ pub trait EncryptionScheme<RNG: RngCore + CryptoRng> {
     fn encrypt(public_key: Self::PK, message: Self::MSG, rng: &mut RNG) -> Self::CTXT;
     fn decrypt(secret_key: Self::SK, ciphertext: Self::CTXT) -> Self::MSG;
 }
-
-

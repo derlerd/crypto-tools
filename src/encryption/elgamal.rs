@@ -9,7 +9,7 @@ use std::marker::PhantomData;
 use rand::rngs::ThreadRng;
 use rand::{CryptoRng, RngCore};
 
-use crate::encryption::{ SecretKey, PublicKey };
+use crate::encryption::{PublicKey, SecretKey};
 
 pub struct ElGamal<RNG: RngCore + CryptoRng> {
     phantom_rng: PhantomData<RNG>,
@@ -32,21 +32,18 @@ impl<RNG: RngCore + CryptoRng> super::SecretKey<RNG> for ElGamalSecretKey {
 }
 
 impl super::PublicKey for ElGamalPublicKey {
-	type SK = ElGamalSecretKey;
-	
+    type SK = ElGamalSecretKey;
+
     fn from_secret(secret_key: &ElGamalSecretKey) -> ElGamalPublicKey {
         ElGamalPublicKey(&secret_key.0 * &curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT)
     }
 }
 
-impl<RNG: RngCore + CryptoRng>
-    super::EncryptionScheme<RNG>
-    for ElGamal<RNG>
-{
-	type SK = ElGamalSecretKey;
-	type PK = ElGamalPublicKey;
-	type MSG = ElGamalMessage; 
-	type CTXT = ElGamalCiphertext;
+impl<RNG: RngCore + CryptoRng> super::EncryptionScheme<RNG> for ElGamal<RNG> {
+    type SK = ElGamalSecretKey;
+    type PK = ElGamalPublicKey;
+    type MSG = ElGamalMessage;
+    type CTXT = ElGamalCiphertext;
 
     fn key_gen(key_len: u32, rng: &mut RNG) -> Option<(ElGamalSecretKey, ElGamalPublicKey)> {
         let sk = match ElGamalSecretKey::generate(key_len, rng) {
