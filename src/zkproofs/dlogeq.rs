@@ -6,9 +6,9 @@ use rand::{CryptoRng, RngCore};
 
 use std::marker::PhantomData;
 
-use sha2::Sha512;
+use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use digest::Digest;
-use crate::hashing::{ DomainSeparator, DomainSeparatedHash, Hashable };
+use sha2::Sha512;
 
 pub struct DlogEq<RNG: RngCore + CryptoRng> {
     phantom_rng: PhantomData<RNG>,
@@ -36,7 +36,6 @@ pub struct DlogEqResponse(Scalar);
 
 pub struct DlogEqProof {
     commitment: DlogEqCommitment,
-    challenge: DlogEqChallenge,
     response: DlogEqResponse,
 }
 
@@ -66,20 +65,20 @@ impl<'a> DlogEqStatement<'a> {
     }
 }
 
-impl<DIG : Digest> Hashable<DIG> for DlogEqStatement<'_> {
-  fn hash(&self, state : &mut DIG) {
-    state.input(self.g_1.compress().as_bytes());
-    state.input(self.h_1.compress().as_bytes());
-    state.input(self.g_2.compress().as_bytes());
-    state.input(self.h_2.compress().as_bytes());
-  }
+impl<DIG: Digest> Hashable<DIG> for DlogEqStatement<'_> {
+    fn hash(&self, state: &mut DIG) {
+        state.input(self.g_1.compress().as_bytes());
+        state.input(self.h_1.compress().as_bytes());
+        state.input(self.g_2.compress().as_bytes());
+        state.input(self.h_2.compress().as_bytes());
+    }
 }
 
-impl<DIG : Digest> Hashable<DIG> for DlogEqCommitment {
-   fn hash(&self, state : &mut DIG) {
-    state.input(self.c1.compress().as_bytes());
-    state.input(self.c2.compress().as_bytes());
-  } 
+impl<DIG: Digest> Hashable<DIG> for DlogEqCommitment {
+    fn hash(&self, state: &mut DIG) {
+        state.input(self.c1.compress().as_bytes());
+        state.input(self.c2.compress().as_bytes());
+    }
 }
 
 impl<'a> DlogEqWitness<'a> {
@@ -115,9 +114,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for DlogEq<RNG>
         Some((commitments, state))
     }
 
-    fn challenge(
-        rng: &mut RNG
-    ) -> DlogEqChallenge {
+    fn challenge(rng: &mut RNG) -> DlogEqChallenge {
         DlogEqChallenge(Scalar::random(rng))
     }
 
@@ -148,12 +145,29 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for DlogEq<RNG>
         }
         false
     }
+
+    fn simulate(
+        statement: &DlogEqStatement,
+        challenge: &DlogEqChallenge,
+        rng: &mut RNG,
+    ) -> (DlogEqCommitment, DlogEqResponse) {
+        let rsp = Scalar::random(rng);
+        let c1 = statement.g_1 * rsp - statement.h_1 * challenge.0;
+        let c2 = statement.g_2 * rsp - statement.h_2 * challenge.0;
+
+        (DlogEqCommitment { c1: c1, c2: c2 }, DlogEqResponse(rsp))
+    }
 }
 
-impl<RNG: RngCore + CryptoRng> super::FiatShamirConvertibleSigmaProtocol<'_, RNG, Self> for DlogEq<RNG> {
+impl<RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<'_, RNG, Self>
+    for DlogEq<RNG>
+{
     type P = DlogEqProof;
-    
-    fn hash_challenge(statement : &DlogEqStatement, commitment : &DlogEqCommitment) -> DlogEqChallenge {
+
+    fn hash_challenge(
+        statement: &DlogEqStatement,
+        commitment: &DlogEqCommitment,
+    ) -> DlogEqChallenge {
         let dom_sep = DomainSeparator::from_string("dlogeq".to_string());
         let mut h = DomainSeparatedHash::<Sha512>::new(dom_sep);
         statement.hash(&mut h);
@@ -161,20 +175,15 @@ impl<RNG: RngCore + CryptoRng> super::FiatShamirConvertibleSigmaProtocol<'_, RNG
         DlogEqChallenge(Scalar::from_hash(h))
     }
 
-    fn compile_proof(
-        commitment: DlogEqCommitment,
-        challenge: DlogEqChallenge,
-        response: DlogEqResponse,
-    ) -> DlogEqProof {
+    fn compile_proof(commitment: DlogEqCommitment, response: DlogEqResponse) -> DlogEqProof {
         DlogEqProof {
             commitment: commitment,
-            challenge: challenge,
             response: response,
         }
     }
 
-    fn unwrap_proof(proof: DlogEqProof) -> (DlogEqCommitment, DlogEqChallenge, DlogEqResponse) {
-        (proof.commitment, proof.challenge, proof.response)
+    fn unwrap_proof(proof: DlogEqProof) -> (DlogEqCommitment, DlogEqResponse) {
+        (proof.commitment, proof.response)
     }
 }
 

@@ -9,7 +9,7 @@ use std::marker::PhantomData;
 use digest::Digest;
 use sha2::Sha512;
 
-use crate::hashing::{ DomainSeparator, DomainSeparatedHash, Hashable };
+use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 
 pub struct Dlog<RNG: RngCore + CryptoRng> {
     phantom_rng: PhantomData<RNG>,
@@ -34,19 +34,12 @@ pub struct DlogResponse(Scalar);
 
 pub struct DlogProof {
     commitment: DlogCommitment,
-    challenge: DlogChallenge,
     response: DlogResponse,
 }
 
 impl<'a> DlogStatement<'a> {
-    pub fn new(
-        g_1: &'a RistrettoPoint,
-        h_1: &'a RistrettoPoint
-    ) -> Self {
-        DlogStatement {
-            g_1: g_1,
-            h_1: h_1
-        }
+    pub fn new(g_1: &'a RistrettoPoint, h_1: &'a RistrettoPoint) -> Self {
+        DlogStatement { g_1: g_1, h_1: h_1 }
     }
 
     fn verify(&self, witness: &DlogWitness) -> bool {
@@ -59,17 +52,17 @@ impl<'a> DlogStatement<'a> {
     }
 }
 
-impl<DIG : Digest> Hashable<DIG> for DlogStatement<'_> {
-  fn hash(&self, state : &mut DIG) {
-    state.input(self.g_1.compress().as_bytes());
-    state.input(self.h_1.compress().as_bytes());
-  }
+impl<DIG: Digest> Hashable<DIG> for DlogStatement<'_> {
+    fn hash(&self, state: &mut DIG) {
+        state.input(self.g_1.compress().as_bytes());
+        state.input(self.h_1.compress().as_bytes());
+    }
 }
 
-impl<DIG : Digest> Hashable<DIG> for DlogCommitment {
-   fn hash(&self, state : &mut DIG) {
-    state.input(self.c1.compress().as_bytes());
-  } 
+impl<DIG: Digest> Hashable<DIG> for DlogCommitment {
+    fn hash(&self, state: &mut DIG) {
+        state.input(self.c1.compress().as_bytes());
+    }
 }
 
 impl<'a> DlogWitness<'a> {
@@ -104,9 +97,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
         Some((commitments, state))
     }
 
-    fn challenge(
-        rng: &mut RNG
-    ) -> DlogChallenge {
+    fn challenge(rng: &mut RNG) -> DlogChallenge {
         DlogChallenge(Scalar::random(rng))
     }
 
@@ -135,12 +126,25 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
         }
         false
     }
+
+    fn simulate(
+        statement: &DlogStatement,
+        challenge: &DlogChallenge,
+        rng: &mut RNG,
+    ) -> (DlogCommitment, DlogResponse) {
+        let rsp = Scalar::random(rng);
+        let com = statement.g_1 * rsp - statement.h_1 * challenge.0;
+
+        (DlogCommitment { c1: com }, DlogResponse(rsp))
+    }
 }
 
-impl<RNG: RngCore + CryptoRng> super::FiatShamirConvertibleSigmaProtocol<'_, RNG, Self> for Dlog<RNG> {
+impl<RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<'_, RNG, Self>
+    for Dlog<RNG>
+{
     type P = DlogProof;
 
-    fn hash_challenge(statement : &DlogStatement, commitment : &DlogCommitment) -> DlogChallenge {
+    fn hash_challenge(statement: &DlogStatement, commitment: &DlogCommitment) -> DlogChallenge {
         let dom_sep = DomainSeparator::from_string("dlog".to_string());
         let mut h = DomainSeparatedHash::<Sha512>::new(dom_sep);
         statement.hash(&mut h);
@@ -148,20 +152,15 @@ impl<RNG: RngCore + CryptoRng> super::FiatShamirConvertibleSigmaProtocol<'_, RNG
         DlogChallenge(Scalar::from_hash(h))
     }
 
-    fn compile_proof(
-        commitment: DlogCommitment,
-        challenge: DlogChallenge,
-        response: DlogResponse,
-    ) -> DlogProof {
+    fn compile_proof(commitment: DlogCommitment, response: DlogResponse) -> DlogProof {
         DlogProof {
             commitment: commitment,
-            challenge: challenge,
             response: response,
         }
     }
 
-    fn unwrap_proof(proof: DlogProof) -> (DlogCommitment, DlogChallenge, DlogResponse) {
-        (proof.commitment, proof.challenge, proof.response)
+    fn unwrap_proof(proof: DlogProof) -> (DlogCommitment, DlogResponse) {
+        (proof.commitment, proof.response)
     }
 }
 

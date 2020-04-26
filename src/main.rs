@@ -1,17 +1,17 @@
 mod encryption;
-mod zkproofs;
 mod hashing;
+mod zkproofs;
 
 use rand::thread_rng;
 use sha2::Sha512;
 
 use curve25519_dalek::scalar::Scalar;
 
-use crate::encryption::EncryptionScheme;
 use crate::encryption::elgamal::{ElGamalMessage, ElGamalWithThreadRng};
-use crate::zkproofs::ProofSystem;
-use crate::zkproofs::dlogeq::{DlogEqStatement, DlogEqWithThreadRng, DlogEqWitness};
+use crate::encryption::EncryptionScheme;
 use crate::zkproofs::dlog::{DlogStatement, DlogWithThreadRng, DlogWitness};
+use crate::zkproofs::dlogeq::{DlogEqStatement, DlogEqWithThreadRng, DlogEqWitness};
+use crate::zkproofs::ProofSystem;
 
 fn main() {
     let (sk, pk) = ElGamalWithThreadRng::key_gen(32, &mut thread_rng()).unwrap();

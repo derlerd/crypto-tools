@@ -29,14 +29,16 @@ pub trait SigmaProtocol<'a, RNG> {
         challenge: &Self::CH,
         response: &Self::RSP,
     ) -> bool;
+    fn simulate(statement: &Self::S, challenge: &Self::CH, rng: &mut RNG)
+        -> (Self::COM, Self::RSP);
 }
 
-pub trait FiatShamirConvertibleSigmaProtocol<'a, RNG, SP: SigmaProtocol<'a, RNG>> {
+pub trait FsConvertibleSigmaProtocol<'a, RNG, SP: SigmaProtocol<'a, RNG>> {
     type P;
 
-    fn hash_challenge(statement : &SP::S, commitment : &SP::COM) -> SP::CH;
-    fn compile_proof(commitment: SP::COM, challenge: SP::CH, response: SP::RSP) -> Self::P;
-    fn unwrap_proof(proof: Self::P) -> (SP::COM, SP::CH, SP::RSP);
+    fn hash_challenge(statement: &SP::S, commitment: &SP::COM) -> SP::CH;
+    fn compile_proof(commitment: SP::COM, response: SP::RSP) -> Self::P;
+    fn unwrap_proof(proof: Self::P) -> (SP::COM, SP::RSP);
 }
 
 pub trait ProofSystem<'a, RNG> {
@@ -51,7 +53,7 @@ pub trait ProofSystem<'a, RNG> {
 impl<
         'a,
         RNG: RngCore + CryptoRng,
-        SP: SigmaProtocol<'a, RNG> + FiatShamirConvertibleSigmaProtocol<'a, RNG, SP>,
+        SP: SigmaProtocol<'a, RNG> + FsConvertibleSigmaProtocol<'a, RNG, SP>,
     > ProofSystem<'a, RNG> for SP
 {
     type S = SP::S;
@@ -64,21 +66,16 @@ impl<
             None => return None,
         };
 
-        let ch = SP::hash_challenge(statement, &com); // TODO replace with RO challenge generation and drop challenge from proof
+        let ch = SP::hash_challenge(statement, &com);
 
         let rsp = SP::response(statement, witness, &ch, &st);
 
-        Some(SP::compile_proof(com, ch, rsp))
+        Some(SP::compile_proof(com, rsp))
     }
 
     fn verify(statement: &Self::S, proof: Self::P) -> bool {
-        let (commitment, challenge, response) = SP::unwrap_proof(proof);
-        SP::check(
-            statement,
-            &commitment,
-            &challenge, // TODO drop challenge from proof and recompute here
-            &response,
-        )
+        let (commitment, response) = SP::unwrap_proof(proof);
+        let ch = SP::hash_challenge(statement, &commitment);
+        SP::check(statement, &commitment, &ch, &response)
     }
 }
-
