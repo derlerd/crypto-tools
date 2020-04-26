@@ -159,9 +159,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for DlogEq<RNG>
     }
 }
 
-impl<RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<'_, RNG, Self>
-    for DlogEq<RNG>
-{
+impl<RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<'_, RNG, Self> for DlogEq<RNG> {
     type P = DlogEqProof;
 
     fn hash_challenge(
