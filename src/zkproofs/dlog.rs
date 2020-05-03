@@ -10,6 +10,7 @@ use digest::Digest;
 use sha2::Sha512;
 
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
+use crate::zkproofs::{Challenge};
 
 pub struct Dlog<RNG: RngCore + CryptoRng> {
     phantom_rng: PhantomData<RNG>,
@@ -29,11 +30,10 @@ pub struct DlogCommitment {
 }
 
 pub struct DlogProverState(Scalar);
-pub struct DlogChallenge(Scalar);
 pub struct DlogResponse(Scalar);
 
 pub struct DlogSimulatorState {
-    challenge: DlogChallenge,
+    challenge: Challenge,
     response: DlogResponse,
 }
 
@@ -81,7 +81,6 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
     type W = DlogWitness<'a>;
     type COM = DlogCommitment;
     type ST = DlogProverState;
-    type CH = DlogChallenge;
     type RSP = DlogResponse;
     type STS = DlogSimulatorState;
 
@@ -103,14 +102,14 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
         Some((commitments, state))
     }
 
-    fn challenge(rng: &mut RNG) -> DlogChallenge {
-        DlogChallenge(Scalar::random(rng))
+    fn challenge(rng: &mut RNG) -> Challenge {
+        Challenge(Scalar::random(rng))
     }
 
     fn response(
         _statement: &DlogStatement,
         witness: &DlogWitness,
-        challenge: &DlogChallenge,
+        challenge: &Challenge,
         state: &DlogProverState,
     ) -> DlogResponse {
         DlogResponse(&state.0 + witness.x * challenge.0)
@@ -119,7 +118,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
     fn check(
         statement: &DlogStatement,
         commitment: &DlogCommitment,
-        challenge: &DlogChallenge,
+        challenge: &Challenge,
         response: &DlogResponse,
     ) -> bool {
         let g_1s = statement.g_1 * response.0;
@@ -141,7 +140,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
         (
             DlogCommitment { c1: com },
             DlogSimulatorState {
-                challenge: DlogChallenge(ch),
+                challenge: Challenge(ch),
                 response: DlogResponse(rsp),
             },
         )
@@ -151,12 +150,12 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
 impl<RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<'_, RNG, Self> for Dlog<RNG> {
     type P = DlogProof;
 
-    fn hash_challenge(statement: &DlogStatement, commitment: &DlogCommitment) -> DlogChallenge {
+    fn hash_challenge(statement: &DlogStatement, commitment: &DlogCommitment) -> Challenge {
         let dom_sep = DomainSeparator::from_string("dlog".to_string());
         let mut h = DomainSeparatedHash::<Sha512>::new(dom_sep);
         statement.hash(&mut h);
         commitment.hash(&mut h);
-        DlogChallenge(Scalar::from_hash(h))
+        Challenge(Scalar::from_hash(h))
     }
 
     fn compile_proof(commitment: DlogCommitment, response: DlogResponse) -> DlogProof {

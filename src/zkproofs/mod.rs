@@ -1,16 +1,19 @@
 pub mod dlog;
 pub mod dlogeq;
 
+use curve25519_dalek::scalar::Scalar;
+
 use rand::{CryptoRng, RngCore};
 
 use std::marker::PhantomData;
+
+pub struct Challenge(Scalar);
 
 pub trait SigmaProtocol<'a, RNG> {
     type S;
     type W;
     type COM;
     type ST;
-    type CH;
     type RSP;
     type STS;
 
@@ -19,17 +22,17 @@ pub trait SigmaProtocol<'a, RNG> {
         witness: &Self::W,
         rng: &mut RNG,
     ) -> Option<(Self::COM, Self::ST)>;
-    fn challenge(rng: &mut RNG) -> Self::CH;
+    fn challenge(rng: &mut RNG) -> Challenge;
     fn response(
         statement: &Self::S,
         witness: &Self::W,
-        challenge: &Self::CH,
+        challenge: &Challenge,
         state: &Self::ST,
     ) -> Self::RSP;
     fn check(
         statement: &Self::S,
         commitment: &Self::COM,
-        challenge: &Self::CH,
+        challenge: &Challenge,
         response: &Self::RSP,
     ) -> bool;
     fn simulate(statement: &Self::S, rng: &mut RNG) -> (Self::COM, Self::STS);
@@ -38,7 +41,7 @@ pub trait SigmaProtocol<'a, RNG> {
 pub trait FsConvertibleSigmaProtocol<'a, RNG, SP: SigmaProtocol<'a, RNG>> {
     type P;
 
-    fn hash_challenge(statement: &SP::S, commitment: &SP::COM) -> SP::CH;
+    fn hash_challenge(statement: &SP::S, commitment: &SP::COM) -> Challenge;
     fn compile_proof(commitment: SP::COM, response: SP::RSP) -> Self::P;
     fn unwrap_proof(proof: Self::P) -> (SP::COM, SP::RSP);
 }
@@ -69,7 +72,6 @@ impl<'a, RNG: RngCore + CryptoRng, P1: SigmaProtocol<'a, RNG>, P2: SigmaProtocol
     type W = OrComposedWitness<'a, RNG, P1, P2>;
     type COM = (P1::COM, P2::COM);
     type ST = OrProverState<'a, RNG, P1, P2>;
-    type CH = P1::CH;
     type RSP = (P1::RSP, P2::RSP);
     type STS = (P1::STS, P2::STS);
 
@@ -112,14 +114,14 @@ impl<'a, RNG: RngCore + CryptoRng, P1: SigmaProtocol<'a, RNG>, P2: SigmaProtocol
         }
     }
 
-    fn challenge(rng: &mut RNG) -> Self::CH {
+    fn challenge(rng: &mut RNG) -> Challenge {
         P1::challenge(rng)
     }
 
     fn response(
         statement: &Self::S,
         witness: &Self::W,
-        challenge: &Self::CH,
+        challenge: &Challenge,
         state: &Self::ST,
     ) -> Self::RSP {
         match state {
@@ -132,7 +134,7 @@ impl<'a, RNG: RngCore + CryptoRng, P1: SigmaProtocol<'a, RNG>, P2: SigmaProtocol
     fn check(
         statement: &Self::S,
         commitment: &Self::COM,
-        challenge: &Self::CH,
+        challenge: &Challenge,
         response: &Self::RSP,
     ) -> bool {
         unimplemented!();
