@@ -117,7 +117,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
     fn response(
         _statement: &DlogStatement,
         witness: &DlogWitness,
-        challenge: Challenge,
+        challenge: &Challenge,
         state: DlogProverState,
     ) -> DlogResponse {
         DlogResponse(&state.0 + witness.x * &challenge.0)

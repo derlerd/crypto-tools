@@ -134,7 +134,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for DlogEq<RNG>
     fn response(
         _statement: &DlogEqStatement,
         witness: &DlogEqWitness,
-        challenge: Challenge,
+        challenge: &Challenge,
         state: DlogEqProverState,
     ) -> DlogEqResponse {
         DlogEqResponse(&state.0 + witness.x * &challenge.0)
@@ -181,10 +181,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for DlogEq<RNG>
 impl<RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<'_, RNG, Self> for DlogEq<RNG> {
     type P = DlogEqProof;
 
-    fn hash_challenge(
-        statement: &DlogEqStatement,
-        commitment: &DlogEqCommitment,
-    ) -> Challenge {
+    fn hash_challenge(statement: &DlogEqStatement, commitment: &DlogEqCommitment) -> Challenge {
         let dom_sep = DomainSeparator::from_string("dlogeq".to_string());
         let mut h = DomainSeparatedHash::<Sha512>::new(dom_sep);
         statement.hash(&mut h);
