@@ -7,7 +7,7 @@ use rand::{CryptoRng, RngCore};
 use std::marker::PhantomData;
 
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
-use crate::zkproofs::{Challenge};
+use crate::zkproofs::{Challenge, SimulatorState};
 use digest::Digest;
 use sha2::Sha512;
 
@@ -42,6 +42,14 @@ pub struct DlogEqProof {
 pub struct DlogEqSimulatorState {
     challenge: Challenge,
     response: DlogEqResponse,
+}
+
+impl SimulatorState for DlogEqSimulatorState {
+    type RSP = DlogEqResponse;
+
+    fn decompose(self) -> (Challenge, DlogEqResponse) {
+        (self.challenge, self.response)
+    }
 }
 
 impl<'a> DlogEqStatement<'a> {
@@ -126,10 +134,10 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for DlogEq<RNG>
     fn response(
         _statement: &DlogEqStatement,
         witness: &DlogEqWitness,
-        challenge: &Challenge,
-        state: &DlogEqProverState,
+        challenge: Challenge,
+        state: DlogEqProverState,
     ) -> DlogEqResponse {
-        DlogEqResponse(&state.0 + witness.x * challenge.0)
+        DlogEqResponse(&state.0 + witness.x * &challenge.0)
     }
 
     fn check(

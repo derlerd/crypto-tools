@@ -10,7 +10,7 @@ use digest::Digest;
 use sha2::Sha512;
 
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
-use crate::zkproofs::{Challenge};
+use crate::zkproofs::{Challenge, SimulatorState};
 
 pub struct Dlog<RNG: RngCore + CryptoRng> {
     phantom_rng: PhantomData<RNG>,
@@ -35,6 +35,14 @@ pub struct DlogResponse(Scalar);
 pub struct DlogSimulatorState {
     challenge: Challenge,
     response: DlogResponse,
+}
+
+impl SimulatorState for DlogSimulatorState {
+    type RSP = DlogResponse;
+
+    fn decompose(self) -> (Challenge, DlogResponse) {
+        (self.challenge, self.response)
+    }
 }
 
 pub struct DlogProof {
@@ -109,10 +117,10 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
     fn response(
         _statement: &DlogStatement,
         witness: &DlogWitness,
-        challenge: &Challenge,
-        state: &DlogProverState,
+        challenge: Challenge,
+        state: DlogProverState,
     ) -> DlogResponse {
-        DlogResponse(&state.0 + witness.x * challenge.0)
+        DlogResponse(&state.0 + witness.x * &challenge.0)
     }
 
     fn check(
