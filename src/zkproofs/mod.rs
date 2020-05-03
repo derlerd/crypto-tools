@@ -110,6 +110,28 @@ impl<'a, RNG: RngCore + CryptoRng, P1: SigmaProtocol<'a, RNG>, P2: SigmaProtocol
 }
 
 impl<'a, RNG: RngCore + CryptoRng, P1: SigmaProtocol<'a, RNG>, P2: SigmaProtocol<'a, RNG>>
+    OrComposedSigmaProtocol<'a, RNG, P1, P2>
+{
+    pub fn compile_witness(
+        w1: Option<P1::W>,
+        w2: Option<P2::W>,
+    ) -> Option<OrComposedWitness<'a, RNG, P1, P2>> {
+        let w = match (w1, w2) {
+            (Some(w1), None) => OrComposedWitness::WitnessP1(w1),
+            (None, Some(w2)) => OrComposedWitness::WitnessP2(w2),
+            (Some(w1), Some(w2)) => OrComposedWitness::Both((w1, w2)),
+            _ => return None,
+        };
+
+        Some(w)
+    }
+
+    pub fn compile_statement(s1: P1::S, s2: P2::S) -> (P1::S, P2::S) {
+        (s1, s2)
+    }
+}
+
+impl<'a, RNG: RngCore + CryptoRng, P1: SigmaProtocol<'a, RNG>, P2: SigmaProtocol<'a, RNG>>
     SigmaProtocol<'a, RNG> for OrComposedSigmaProtocol<'a, RNG, P1, P2>
 {
     type S = (P1::S, P2::S);
@@ -247,8 +269,6 @@ impl<
     }
 }
 
-type DlOrDlEq<'a, RNG: RngCore + CryptoRng> =
-    OrComposedSigmaProtocol<'a, RNG, Dlog<RNG>, DlogEq<RNG>>;
+type DlOrDlEq<'a, RNG> = OrComposedSigmaProtocol<'a, RNG, Dlog<RNG>, DlogEq<RNG>>;
+
 pub type DlOrDlEqWithThreadRng<'a> = DlOrDlEq<'a, ThreadRng>;
-pub type DlOrDlEqWitness<'a, RNG: RngCore + CryptoRng> =
-    OrComposedWitness<'a, RNG, Dlog<RNG>, DlogEq<RNG>>;

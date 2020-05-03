@@ -11,7 +11,7 @@ use crate::encryption::elgamal::{ElGamalMessage, ElGamalWithThreadRng};
 use crate::encryption::EncryptionScheme;
 use crate::zkproofs::dlog::{DlogStatement, DlogWithThreadRng, DlogWitness};
 use crate::zkproofs::dlogeq::{DlogEqStatement, DlogEqWithThreadRng, DlogEqWitness};
-use crate::zkproofs::{DlOrDlEqWithThreadRng, DlOrDlEqWitness, ProofSystem, SigmaProtocol};
+use crate::zkproofs::{DlOrDlEqWithThreadRng, ProofSystem, SigmaProtocol};
 
 fn main() {
     let (sk, pk) = ElGamalWithThreadRng::key_gen(32, &mut thread_rng()).unwrap();
@@ -48,8 +48,8 @@ fn main() {
 
     println!("{:?}", success);
 
-    let x = (x2, x1);
-    let w = DlOrDlEqWitness::WitnessP1(w2);
+    let x = DlOrDlEqWithThreadRng::compile_statement(x2, x1);
+    let w = DlOrDlEqWithThreadRng::compile_witness(Some(w2), Some(w1)).unwrap();
 
     let (c, st) = DlOrDlEqWithThreadRng::commit(&x, &w, &mut thread_rng()).unwrap();
     let ch = DlOrDlEqWithThreadRng::challenge(&mut thread_rng());
