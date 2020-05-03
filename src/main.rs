@@ -11,7 +11,7 @@ use crate::encryption::elgamal::{ElGamalMessage, ElGamalWithThreadRng};
 use crate::encryption::EncryptionScheme;
 use crate::zkproofs::dlog::{DlogStatement, DlogWithThreadRng, DlogWitness};
 use crate::zkproofs::dlogeq::{DlogEqStatement, DlogEqWithThreadRng, DlogEqWitness};
-use crate::zkproofs::ProofSystem;
+use crate::zkproofs::{DlOrDlEqWithThreadRng, DlOrDlEqWitness, ProofSystem, SigmaProtocol};
 
 fn main() {
     let (sk, pk) = ElGamalWithThreadRng::key_gen(32, &mut thread_rng()).unwrap();
@@ -30,21 +30,32 @@ fn main() {
     let h_1 = &s_2 * &g_1;
     let h_2 = &s_2 * &g_2;
 
-    let x = DlogEqStatement::new(&g_1, &h_1, &g_2, &h_2);
-    let w = DlogEqWitness::new(&s_2);
+    let x1 = DlogEqStatement::new(&g_1, &h_1, &g_2, &h_2);
+    let w1 = DlogEqWitness::new(&s_2);
 
-    let p = DlogEqWithThreadRng::prove(&x, &w, &mut thread_rng());
+    let p1 = DlogEqWithThreadRng::prove(&x1, &w1, &mut thread_rng());
 
-    let success = DlogEqWithThreadRng::verify(&x, p.unwrap());
+    let success = DlogEqWithThreadRng::verify(&x1, p1.unwrap());
 
     println!("{:?}", success);
 
-    let x = DlogStatement::new(&g_1, &h_1);
-    let w = DlogWitness::new(&s_2);
+    let x2 = DlogStatement::new(&g_1, &h_1);
+    let w2 = DlogWitness::new(&s_2);
 
-    let p = DlogWithThreadRng::prove(&x, &w, &mut thread_rng());
+    let p2 = DlogWithThreadRng::prove(&x2, &w2, &mut thread_rng());
 
-    let success = DlogWithThreadRng::verify(&x, p.unwrap());
+    let success = DlogWithThreadRng::verify(&x2, p2.unwrap());
+
+    println!("{:?}", success);
+
+    let x = (x2, x1);
+    let w = DlOrDlEqWitness::WitnessP1(w2);
+
+    let (c, st) = DlOrDlEqWithThreadRng::commit(&x, &w, &mut thread_rng()).unwrap();
+    let ch = DlOrDlEqWithThreadRng::challenge(&mut thread_rng());
+    let rsp = DlOrDlEqWithThreadRng::response(&x, &w, &ch, st);
+
+    let success = DlOrDlEqWithThreadRng::check(&x, &c, &ch, &rsp);
 
     println!("{:?}", success);
 }

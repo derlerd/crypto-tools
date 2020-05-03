@@ -3,11 +3,15 @@ pub mod dlogeq;
 
 use curve25519_dalek::scalar::Scalar;
 
+use rand::rngs::ThreadRng;
 use rand::{CryptoRng, RngCore};
 
 use std::marker::PhantomData;
 
 use std::ops::{Add, Sub};
+
+use crate::zkproofs::dlog::Dlog;
+use crate::zkproofs::dlogeq::DlogEq;
 
 pub struct Challenge(Scalar);
 
@@ -242,3 +246,9 @@ impl<
         SP::check(statement, &commitment, &ch, &response)
     }
 }
+
+type DlOrDlEq<'a, RNG: RngCore + CryptoRng> =
+    OrComposedSigmaProtocol<'a, RNG, Dlog<RNG>, DlogEq<RNG>>;
+pub type DlOrDlEqWithThreadRng<'a> = DlOrDlEq<'a, ThreadRng>;
+pub type DlOrDlEqWitness<'a, RNG: RngCore + CryptoRng> =
+    OrComposedWitness<'a, RNG, Dlog<RNG>, DlogEq<RNG>>;
