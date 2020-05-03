@@ -7,7 +7,25 @@ use rand::{CryptoRng, RngCore};
 
 use std::marker::PhantomData;
 
+use std::ops::{ Add, Sub };
+
 pub struct Challenge(Scalar);
+
+impl Sub for Challenge {
+    type Output = Challenge;
+
+    fn sub(self, other : Challenge) -> Challenge {
+      Challenge(self.0 - other.0)
+    }
+}
+
+impl Add for Challenge {
+    type Output = Challenge;
+
+    fn add(self, other : Challenge) -> Challenge {
+      Challenge(self.0 + other.0)
+    }
+}
 
 pub trait SigmaProtocol<'a, RNG> {
     type S;
