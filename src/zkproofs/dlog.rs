@@ -12,8 +12,8 @@ use sha2::Sha512;
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use crate::zkproofs::{Challenge, SimulatorState};
 
-pub struct Dlog<RNG: RngCore + CryptoRng> {
-    phantom_rng: PhantomData<RNG>,
+pub struct Dlog<'a, RNG: RngCore + CryptoRng> {
+    phantom_rng: PhantomData<&'a RNG>,
 }
 
 pub struct DlogStatement<'a> {
@@ -84,7 +84,7 @@ impl<'a> DlogWitness<'a> {
     }
 }
 
-impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
+impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<RNG> for Dlog<'a, RNG> {
     type S = DlogStatement<'a>;
     type W = DlogWitness<'a>;
     type COM = DlogCommitment;
@@ -155,7 +155,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for Dlog<RNG> {
     }
 }
 
-impl<RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<'_, RNG, Self> for Dlog<RNG> {
+impl<'a, RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<RNG, Self> for Dlog<'a, RNG> {
     type P = DlogProof;
 
     fn hash_challenge(statement: &DlogStatement, commitment: &DlogCommitment) -> Challenge {
@@ -178,4 +178,4 @@ impl<RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<'_, RNG, Self> 
     }
 }
 
-pub type DlogWithThreadRng = Dlog<ThreadRng>;
+pub type DlogWithThreadRng<'a> = Dlog<'a, ThreadRng>;

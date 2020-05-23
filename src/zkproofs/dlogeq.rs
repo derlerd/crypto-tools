@@ -11,8 +11,8 @@ use crate::zkproofs::{Challenge, SimulatorState};
 use digest::Digest;
 use sha2::Sha512;
 
-pub struct DlogEq<RNG: RngCore + CryptoRng> {
-    phantom_rng: PhantomData<RNG>,
+pub struct DlogEq<'a, RNG: RngCore + CryptoRng> {
+    phantom_rng: PhantomData<&'a RNG>,
 }
 
 pub struct DlogEqStatement<'a> {
@@ -100,7 +100,7 @@ impl<'a> DlogEqWitness<'a> {
     }
 }
 
-impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for DlogEq<RNG> {
+impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<RNG> for DlogEq<'a, RNG> {
     type S = DlogEqStatement<'a>;
     type W = DlogEqWitness<'a>;
     type COM = DlogEqCommitment;
@@ -178,7 +178,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<'a, RNG> for DlogEq<RNG>
     }
 }
 
-impl<RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<'_, RNG, Self> for DlogEq<RNG> {
+impl<'a, RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<RNG, Self> for DlogEq<'a, RNG> {
     type P = DlogEqProof;
 
     fn hash_challenge(statement: &DlogEqStatement, commitment: &DlogEqCommitment) -> Challenge {
@@ -201,4 +201,4 @@ impl<RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<'_, RNG, Self> 
     }
 }
 
-pub type DlogEqWithThreadRng = DlogEq<ThreadRng>;
+pub type DlogEqWithThreadRng<'a> = DlogEq<'a, ThreadRng>;
