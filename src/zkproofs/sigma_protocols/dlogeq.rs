@@ -7,7 +7,8 @@ use rand::{CryptoRng, RngCore};
 use std::marker::PhantomData;
 
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
-use crate::zkproofs::{Challenge, SimulatorState};
+use crate::zkproofs::sigma_protocols::{SigmaProtocol, Challenge, SimulatorState};
+use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use digest::Digest;
 use sha2::Sha512;
 
@@ -100,7 +101,7 @@ impl<'a> DlogEqWitness<'a> {
     }
 }
 
-impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<RNG> for DlogEq<'a, RNG> {
+impl<'a, RNG: RngCore + CryptoRng> SigmaProtocol<RNG> for DlogEq<'a, RNG> {
     type S = DlogEqStatement<'a>;
     type W = DlogEqWitness<'a>;
     type COM = DlogEqCommitment;
@@ -178,7 +179,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<RNG> for DlogEq<'a, RNG>
     }
 }
 
-impl<'a, RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<RNG, Self>
+impl<'a, RNG: RngCore + CryptoRng> FsConvertibleSigmaProtocol<RNG, Self>
     for DlogEq<'a, RNG>
 {
     type FSP = DlogEqProof;

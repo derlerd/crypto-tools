@@ -10,7 +10,8 @@ use digest::Digest;
 use sha2::Sha512;
 
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
-use crate::zkproofs::{Challenge, SimulatorState};
+use crate::zkproofs::sigma_protocols::{SigmaProtocol, Challenge, SimulatorState};
+use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 
 pub struct Dlog<'a, RNG: RngCore + CryptoRng> {
     phantom_rng: PhantomData<&'a RNG>,
@@ -84,7 +85,7 @@ impl<'a> DlogWitness<'a> {
     }
 }
 
-impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<RNG> for Dlog<'a, RNG> {
+impl<'a, RNG: RngCore + CryptoRng> SigmaProtocol<RNG> for Dlog<'a, RNG> {
     type S = DlogStatement<'a>;
     type W = DlogWitness<'a>;
     type COM = DlogCommitment;
@@ -155,7 +156,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<RNG> for Dlog<'a, RNG> {
     }
 }
 
-impl<'a, RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<RNG, Self> for Dlog<'a, RNG> {
+impl<'a, RNG: RngCore + CryptoRng> FsConvertibleSigmaProtocol<RNG, Self> for Dlog<'a, RNG> {
     type FSP = DlogProof;
 
     fn hash_challenge(statement: &DlogStatement, commitment: &DlogCommitment) -> Challenge {

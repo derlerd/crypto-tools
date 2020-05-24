@@ -9,9 +9,9 @@ use curve25519_dalek::scalar::Scalar;
 
 use crate::encryption::elgamal::{ElGamalMessage, ElGamalWithThreadRng};
 use crate::encryption::EncryptionScheme;
-use crate::zkproofs::dlog::{DlogStatement, DlogWithThreadRng, DlogWitness};
-use crate::zkproofs::dlogeq::{DlogEqStatement, DlogEqWithThreadRng, DlogEqWitness};
-use crate::zkproofs::{DlOrDlEqWithThreadRng, ProofSystem, SigmaProtocol};
+use crate::zkproofs::sigma_protocols::dlog::{DlogStatement, DlogWithThreadRng, DlogWitness};
+use crate::zkproofs::sigma_protocols::dlogeq::{DlogEqStatement, DlogEqWithThreadRng, DlogEqWitness};
+use crate::zkproofs::{DlOrDlEqWithThreadRng, ProofSystem, sigma_protocols::SigmaProtocol};
 
 fn main() {
     let (sk, pk) = ElGamalWithThreadRng::key_gen(32, &mut thread_rng()).unwrap();
