@@ -156,7 +156,7 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<RNG> for Dlog<'a, RNG> {
 }
 
 impl<'a, RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<RNG, Self> for Dlog<'a, RNG> {
-    type P = DlogProof;
+    type FSP = DlogProof;
 
     fn hash_challenge(statement: &DlogStatement, commitment: &DlogCommitment) -> Challenge {
         let dom_sep = DomainSeparator::from_string("dlog".to_string());

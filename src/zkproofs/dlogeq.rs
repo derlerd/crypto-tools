@@ -178,8 +178,10 @@ impl<'a, RNG: RngCore + CryptoRng> super::SigmaProtocol<RNG> for DlogEq<'a, RNG>
     }
 }
 
-impl<'a, RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<RNG, Self> for DlogEq<'a, RNG> {
-    type P = DlogEqProof;
+impl<'a, RNG: RngCore + CryptoRng> super::FsConvertibleSigmaProtocol<RNG, Self>
+    for DlogEq<'a, RNG>
+{
+    type FSP = DlogEqProof;
 
     fn hash_challenge(statement: &DlogEqStatement, commitment: &DlogEqCommitment) -> Challenge {
         let dom_sep = DomainSeparator::from_string("dlogeq".to_string());
