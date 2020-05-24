@@ -10,10 +10,13 @@ use digest::Digest;
 use sha2::Sha512;
 
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
-use crate::zkproofs::sigma_protocols::{SigmaProtocol, Challenge, SimulatorState};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
+use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol, SimulatorState};
 
-pub struct Dlog<'a, RNG: RngCore + CryptoRng> {
+pub struct Dlog<'a, RNG>
+where
+    RNG: RngCore + CryptoRng,
+{
     phantom_rng: PhantomData<&'a RNG>,
 }
 
@@ -66,14 +69,20 @@ impl<'a> DlogStatement<'a> {
     }
 }
 
-impl<DIG: Digest> Hashable<DIG> for DlogStatement<'_> {
+impl<DIG> Hashable<DIG> for DlogStatement<'_>
+where
+    DIG: Digest,
+{
     fn hash(&self, state: &mut DIG) {
         state.input(self.g_1.compress().as_bytes());
         state.input(self.h_1.compress().as_bytes());
     }
 }
 
-impl<DIG: Digest> Hashable<DIG> for DlogCommitment {
+impl<DIG> Hashable<DIG> for DlogCommitment
+where
+    DIG: Digest,
+{
     fn hash(&self, state: &mut DIG) {
         state.input(self.c1.compress().as_bytes());
     }
@@ -85,7 +94,10 @@ impl<'a> DlogWitness<'a> {
     }
 }
 
-impl<'a, RNG: RngCore + CryptoRng> SigmaProtocol<RNG> for Dlog<'a, RNG> {
+impl<'a, RNG> SigmaProtocol<RNG> for Dlog<'a, RNG>
+where
+    RNG: RngCore + CryptoRng,
+{
     type S = DlogStatement<'a>;
     type W = DlogWitness<'a>;
     type COM = DlogCommitment;
@@ -156,7 +168,10 @@ impl<'a, RNG: RngCore + CryptoRng> SigmaProtocol<RNG> for Dlog<'a, RNG> {
     }
 }
 
-impl<'a, RNG: RngCore + CryptoRng> FsConvertibleSigmaProtocol<RNG, Self> for Dlog<'a, RNG> {
+impl<'a, RNG> FsConvertibleSigmaProtocol<RNG, Self> for Dlog<'a, RNG>
+where
+    RNG: RngCore + CryptoRng,
+{
     type FSP = DlogProof;
 
     fn hash_challenge(statement: &DlogStatement, commitment: &DlogCommitment) -> Challenge {

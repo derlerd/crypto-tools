@@ -1,6 +1,12 @@
-use crate::zkproofs::sigma_protocols::{SigmaProtocol, Challenge};
+use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol};
 
-pub trait FsConvertibleSigmaProtocol<RNG, SP: SigmaProtocol<RNG>> {
+use rand::{CryptoRng, RngCore};
+
+pub trait FsConvertibleSigmaProtocol<RNG, SP>
+where
+    RNG: RngCore + CryptoRng,
+    SP: SigmaProtocol<RNG>,
+{
     type FSP;
 
     fn hash_challenge(statement: &SP::S, commitment: &SP::COM) -> Challenge;

@@ -7,7 +7,9 @@ use curve25519_dalek::scalar::Scalar;
 
 use std::ops::{Add, Sub};
 
-pub struct Challenge(pub Scalar);
+use rand::{CryptoRng, RngCore};
+
+pub struct Challenge(Scalar);
 
 impl Sub for &Challenge {
     type Output = Challenge;
@@ -25,7 +27,10 @@ impl Add for &Challenge {
     }
 }
 
-pub trait SigmaProtocol<RNG> {
+pub trait SigmaProtocol<RNG>
+where
+    RNG: RngCore + CryptoRng,
+{
     type S;
     type W;
     type COM;

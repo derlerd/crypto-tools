@@ -3,11 +3,11 @@ pub mod sigma_protocols;
 use rand::rngs::ThreadRng;
 use rand::{CryptoRng, RngCore};
 
-use crate::zkproofs::sigma_protocols::{SigmaProtocol, Challenge, SimulatorState};
-use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::dlog::Dlog;
 use crate::zkproofs::sigma_protocols::dlogeq::DlogEq;
+use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::or_composition::OrComposedSigmaProtocol;
+use crate::zkproofs::sigma_protocols::SigmaProtocol;
 
 pub trait ProofSystem<RNG> {
     type S;
@@ -18,8 +18,10 @@ pub trait ProofSystem<RNG> {
     fn verify(statement: &Self::S, proof: Self::P) -> bool;
 }
 
-impl<RNG: RngCore + CryptoRng, SP: SigmaProtocol<RNG> + FsConvertibleSigmaProtocol<RNG, SP>>
-    ProofSystem<RNG> for SP
+impl<RNG, SP> ProofSystem<RNG> for SP
+where
+    RNG: RngCore + CryptoRng,
+    SP: SigmaProtocol<RNG> + FsConvertibleSigmaProtocol<RNG, SP>,
 {
     type S = SP::S;
     type W = SP::W;

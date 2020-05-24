@@ -5,45 +5,63 @@ use rand::{CryptoRng, RngCore};
 use digest::Digest;
 
 use crate::hashing::Hashable;
-use crate::zkproofs::sigma_protocols::{SigmaProtocol, Challenge, SimulatorState};
+use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol, SimulatorState};
 
-
-
-pub struct OrComposedSigmaProtocol<RNG, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>> {
+pub struct OrComposedSigmaProtocol<RNG, P1, P2>
+where
+    RNG: RngCore + CryptoRng,
+    P1: SigmaProtocol<RNG>,
+    P2: SigmaProtocol<RNG>,
+{
     p1: PhantomData<P1>,
     p2: PhantomData<P2>,
     rng: PhantomData<RNG>,
 }
 
-pub enum OrComposedWitness<RNG, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>> {
+pub enum OrComposedWitness<RNG, P1, P2>
+where
+    RNG: RngCore + CryptoRng,
+    P1: SigmaProtocol<RNG>,
+    P2: SigmaProtocol<RNG>,
+{
     WitnessP1(P1::W),
     WitnessP2(P2::W),
     Both((P1::W, P2::W)),
 }
 
-pub enum OrProverState<RNG, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>> {
+pub enum OrProverState<RNG, P1, P2>
+where
+    RNG: RngCore + CryptoRng,
+    P1: SigmaProtocol<RNG>,
+    P2: SigmaProtocol<RNG>,
+{
     SimulatedP1(P1::STS, P2::ST),
     SimulatedP2(P1::ST, P2::STS),
 }
 
-pub struct OrComposedStatement<RNG, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>>(P1::S, P2::S);
-pub struct OrComposedCommitment<RNG, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>>(
-    P1::COM,
-    P2::COM,
-);
-pub struct OrComposedResponse<RNG, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>>(
-    Challenge,
-    P1::RSP,
-    P2::RSP,
-);
+pub struct OrComposedStatement<
+    RNG: RngCore + CryptoRng,
+    P1: SigmaProtocol<RNG>,
+    P2: SigmaProtocol<RNG>,
+>(P1::S, P2::S);
+pub struct OrComposedCommitment<
+    RNG: RngCore + CryptoRng,
+    P1: SigmaProtocol<RNG>,
+    P2: SigmaProtocol<RNG>,
+>(P1::COM, P2::COM);
+pub struct OrComposedResponse<
+    RNG: RngCore + CryptoRng,
+    P1: SigmaProtocol<RNG>,
+    P2: SigmaProtocol<RNG>,
+>(Challenge, P1::RSP, P2::RSP);
 
-impl<
-        RNG: RngCore + CryptoRng,
-        T: Hashable<DIG>,
-        P1: SigmaProtocol<RNG, S = T>,
-        P2: SigmaProtocol<RNG, S = T>,
-        DIG: Digest,
-    > Hashable<DIG> for OrComposedStatement<RNG, P1, P2>
+impl<RNG, T, P1, P2, DIG> Hashable<DIG> for OrComposedStatement<RNG, P1, P2>
+where
+    RNG: RngCore + CryptoRng,
+    T: Hashable<DIG>,
+    P1: SigmaProtocol<RNG, S = T>,
+    P2: SigmaProtocol<RNG, S = T>,
+    DIG: Digest,
 {
     fn hash(&self, state: &mut DIG) {
         self.0.hash(state);
@@ -51,13 +69,13 @@ impl<
     }
 }
 
-impl<
-        RNG: RngCore + CryptoRng,
-        T: Hashable<DIG>,
-        P1: SigmaProtocol<RNG, COM = T>,
-        P2: SigmaProtocol<RNG, COM = T>,
-        DIG: Digest,
-    > Hashable<DIG> for OrComposedCommitment<RNG, P1, P2>
+impl<RNG, T, P1, P2, DIG> Hashable<DIG> for OrComposedCommitment<RNG, P1, P2>
+where
+    RNG: RngCore + CryptoRng,
+    T: Hashable<DIG>,
+    P1: SigmaProtocol<RNG, COM = T>,
+    P2: SigmaProtocol<RNG, COM = T>,
+    DIG: Digest,
 {
     fn hash(&self, state: &mut DIG) {
         self.0.hash(state);
@@ -65,12 +83,22 @@ impl<
     }
 }
 
-pub struct OrComposedProof<RNG, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>> {
+pub struct OrComposedProof<RNG, P1, P2>
+where
+    RNG: RngCore + CryptoRng,
+    P1: SigmaProtocol<RNG>,
+    P2: SigmaProtocol<RNG>,
+{
     commitment: (P1::COM, P2::COM),
     response: (Challenge, P1::RSP, P2::RSP),
 }
 
-pub struct OrComposedSimulatorState<RNG, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>> {
+pub struct OrComposedSimulatorState<RNG, P1, P2>
+where
+    RNG: RngCore + CryptoRng,
+    P1: SigmaProtocol<RNG>,
+    P2: SigmaProtocol<RNG>,
+{
     sts1: P1::STS,
     sts2: P2::STS,
 }
@@ -209,8 +237,7 @@ impl<RNG: RngCore + CryptoRng, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>> S
             && P2::check(&statement.1, &commitment.1, &ch2, &response.2)
     }
 
-    fn simulate(statement: &Self::S, rng: &mut RNG) -> (Self::COM, Self::STS) {
+    fn simulate(_statement: &Self::S, _rng: &mut RNG) -> (Self::COM, Self::STS) {
         unimplemented!();
     }
 }
-
