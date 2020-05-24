@@ -1,10 +1,14 @@
+use curve25519_dalek::scalar::Scalar;
+
 use std::marker::PhantomData;
 
 use rand::{CryptoRng, RngCore};
 
 use digest::Digest;
+use sha2::Sha512;
 
-use crate::hashing::Hashable;
+use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
+use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol, SimulatorState};
 
 pub struct OrComposedSigmaProtocol<RNG, P1, P2>
@@ -44,23 +48,26 @@ pub struct OrComposedStatement<
     P1: SigmaProtocol<RNG>,
     P2: SigmaProtocol<RNG>,
 >(P1::S, P2::S);
+
 pub struct OrComposedCommitment<
     RNG: RngCore + CryptoRng,
     P1: SigmaProtocol<RNG>,
     P2: SigmaProtocol<RNG>,
 >(P1::COM, P2::COM);
+
 pub struct OrComposedResponse<
     RNG: RngCore + CryptoRng,
     P1: SigmaProtocol<RNG>,
     P2: SigmaProtocol<RNG>,
 >(Challenge, P1::RSP, P2::RSP);
 
-impl<RNG, T, P1, P2, DIG> Hashable<DIG> for OrComposedStatement<RNG, P1, P2>
+impl<RNG, P1, P2, DIG> Hashable<DIG> for OrComposedStatement<RNG, P1, P2>
 where
     RNG: RngCore + CryptoRng,
-    T: Hashable<DIG>,
-    P1: SigmaProtocol<RNG, S = T>,
-    P2: SigmaProtocol<RNG, S = T>,
+    P1: SigmaProtocol<RNG>,
+    P2: SigmaProtocol<RNG>,
+    <P1 as SigmaProtocol<RNG>>::S: Hashable<DIG>,
+    <P2 as SigmaProtocol<RNG>>::S: Hashable<DIG>,
     DIG: Digest,
 {
     fn hash(&self, state: &mut DIG) {
@@ -69,12 +76,13 @@ where
     }
 }
 
-impl<RNG, T, P1, P2, DIG> Hashable<DIG> for OrComposedCommitment<RNG, P1, P2>
+impl<RNG, P1, P2, DIG> Hashable<DIG> for OrComposedCommitment<RNG, P1, P2>
 where
     RNG: RngCore + CryptoRng,
-    T: Hashable<DIG>,
-    P1: SigmaProtocol<RNG, COM = T>,
-    P2: SigmaProtocol<RNG, COM = T>,
+    P1: SigmaProtocol<RNG>,
+    P2: SigmaProtocol<RNG>,
+    <P1 as SigmaProtocol<RNG>>::COM: Hashable<DIG>,
+    <P2 as SigmaProtocol<RNG>>::COM: Hashable<DIG>,
     DIG: Digest,
 {
     fn hash(&self, state: &mut DIG) {
@@ -89,8 +97,8 @@ where
     P1: SigmaProtocol<RNG>,
     P2: SigmaProtocol<RNG>,
 {
-    commitment: (P1::COM, P2::COM),
-    response: (Challenge, P1::RSP, P2::RSP),
+    commitment: OrComposedCommitment<RNG, P1, P2>,
+    response: OrComposedResponse<RNG, P1, P2>,
 }
 
 pub struct OrComposedSimulatorState<RNG, P1, P2>
@@ -103,8 +111,11 @@ where
     sts2: P2::STS,
 }
 
-impl<RNG: RngCore + CryptoRng, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>> SimulatorState
-    for OrComposedSimulatorState<RNG, P1, P2>
+impl<RNG, P1, P2> SimulatorState for OrComposedSimulatorState<RNG, P1, P2>
+where
+    RNG: RngCore + CryptoRng,
+    P1: SigmaProtocol<RNG>,
+    P2: SigmaProtocol<RNG>,
 {
     type RSP = OrComposedResponse<RNG, P1, P2>;
 
@@ -115,8 +126,11 @@ impl<RNG: RngCore + CryptoRng, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>> S
     }
 }
 
-impl<RNG: RngCore + CryptoRng, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>>
-    OrComposedSigmaProtocol<RNG, P1, P2>
+impl<RNG, P1, P2> OrComposedSigmaProtocol<RNG, P1, P2>
+where
+    RNG: RngCore + CryptoRng,
+    P1: SigmaProtocol<RNG>,
+    P2: SigmaProtocol<RNG>,
 {
     pub fn compile_witness(
         w1: Option<P1::W>,
@@ -137,8 +151,11 @@ impl<RNG: RngCore + CryptoRng, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>>
     }
 }
 
-impl<RNG: RngCore + CryptoRng, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>> SigmaProtocol<RNG>
-    for OrComposedSigmaProtocol<RNG, P1, P2>
+impl<RNG, P1, P2> SigmaProtocol<RNG> for OrComposedSigmaProtocol<RNG, P1, P2>
+where
+    RNG: RngCore + CryptoRng,
+    P1: SigmaProtocol<RNG>,
+    P2: SigmaProtocol<RNG>,
 {
     type S = OrComposedStatement<RNG, P1, P2>;
     type W = OrComposedWitness<RNG, P1, P2>;
@@ -239,5 +256,48 @@ impl<RNG: RngCore + CryptoRng, P1: SigmaProtocol<RNG>, P2: SigmaProtocol<RNG>> S
 
     fn simulate(_statement: &Self::S, _rng: &mut RNG) -> (Self::COM, Self::STS) {
         unimplemented!();
+    }
+}
+
+impl<RNG, P1, P2> FsConvertibleSigmaProtocol<RNG, Self> for OrComposedSigmaProtocol<RNG, P1, P2>
+where
+    RNG: RngCore + CryptoRng,
+    P1: SigmaProtocol<RNG> + FsConvertibleSigmaProtocol<RNG, P1>,
+    P2: SigmaProtocol<RNG> + FsConvertibleSigmaProtocol<RNG, P2>,
+    <P1 as SigmaProtocol<RNG>>::S: Hashable<Sha512>,
+    <P2 as SigmaProtocol<RNG>>::S: Hashable<Sha512>,
+    <P1 as SigmaProtocol<RNG>>::COM: Hashable<Sha512>,
+    <P2 as SigmaProtocol<RNG>>::COM: Hashable<Sha512>,
+{
+    type FSP = OrComposedProof<RNG, P1, P2>;
+
+    fn hash_challenge(
+        statement: &OrComposedStatement<RNG, P1, P2>,
+        commitment: &OrComposedCommitment<RNG, P1, P2>,
+    ) -> Challenge {
+        let dom_sep = DomainSeparator::from_string("or_composed".to_string());
+        let mut h = DomainSeparatedHash::<Sha512>::new(dom_sep);
+        statement.hash(&mut h);
+        commitment.hash(&mut h);
+        Challenge(Scalar::from_hash(h))
+    }
+
+    fn compile_proof(
+        commitment: OrComposedCommitment<RNG, P1, P2>,
+        response: OrComposedResponse<RNG, P1, P2>,
+    ) -> OrComposedProof<RNG, P1, P2> {
+        OrComposedProof {
+            commitment: commitment,
+            response: response,
+        }
+    }
+
+    fn unwrap_proof(
+        proof: OrComposedProof<RNG, P1, P2>,
+    ) -> (
+        OrComposedCommitment<RNG, P1, P2>,
+        OrComposedResponse<RNG, P1, P2>,
+    ) {
+        (proof.commitment, proof.response)
     }
 }

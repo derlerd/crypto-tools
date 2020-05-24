@@ -9,6 +9,10 @@ use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::or_composition::OrComposedSigmaProtocol;
 use crate::zkproofs::sigma_protocols::SigmaProtocol;
 
+use crate::hashing::Hashable;
+
+use sha2::Sha512;
+
 pub trait ProofSystem<RNG> {
     type S;
     type W;
@@ -22,6 +26,8 @@ impl<RNG, SP> ProofSystem<RNG> for SP
 where
     RNG: RngCore + CryptoRng,
     SP: SigmaProtocol<RNG> + FsConvertibleSigmaProtocol<RNG, SP>,
+    <Self as SigmaProtocol<RNG>>::S: Hashable<Sha512>,
+    <Self as SigmaProtocol<RNG>>::COM: Hashable<Sha512>,
 {
     type S = SP::S;
     type W = SP::W;

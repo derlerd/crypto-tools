@@ -13,7 +13,9 @@ use crate::zkproofs::sigma_protocols::dlog::{DlogStatement, DlogWithThreadRng, D
 use crate::zkproofs::sigma_protocols::dlogeq::{
     DlogEqStatement, DlogEqWithThreadRng, DlogEqWitness,
 };
-use crate::zkproofs::{sigma_protocols::SigmaProtocol, DlOrDlEqWithThreadRng, ProofSystem};
+use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
+use crate::zkproofs::sigma_protocols::SigmaProtocol;
+use crate::zkproofs::{DlOrDlEqWithThreadRng, ProofSystem};
 
 fn main() {
     let (sk, pk) = ElGamalWithThreadRng::key_gen(32, &mut thread_rng()).unwrap();
@@ -58,6 +60,12 @@ fn main() {
     let rsp = DlOrDlEqWithThreadRng::response(&x, &w, &ch, st);
 
     let success = DlOrDlEqWithThreadRng::check(&x, &c, &ch, &rsp);
+
+    println!("{:?}", success);
+
+    let p_or = DlOrDlEqWithThreadRng::prove(&x, &w, &mut thread_rng());
+
+    let success = DlOrDlEqWithThreadRng::verify(&x, p_or.unwrap());
 
     println!("{:?}", success);
 }
