@@ -53,6 +53,6 @@ where
     }
 }
 
-pub(crate) type DlOrDlEq<'a, RNG> = OrComposedSigmaProtocol<RNG, Dlog<'a, RNG>, DlogEq<'a, RNG>>;
+pub(crate) type DlOrDlEq<RNG> = OrComposedSigmaProtocol<RNG, Dlog<RNG>, DlogEq<RNG>>;
 
-pub type DlOrDlEqWithThreadRng<'a> = DlOrDlEq<'a, ThreadRng>;
+pub type DlOrDlEqWithThreadRng = DlOrDlEq<ThreadRng>;

@@ -1,3 +1,4 @@
+mod chameleon_hashing;
 mod encryption;
 mod hashing;
 mod zkproofs;
@@ -13,7 +14,6 @@ use crate::zkproofs::sigma_protocols::dlog::{DlogStatement, DlogWithThreadRng, D
 use crate::zkproofs::sigma_protocols::dlogeq::{
     DlogEqStatement, DlogEqWithThreadRng, DlogEqWitness,
 };
-use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::SigmaProtocol;
 use crate::zkproofs::{DlOrDlEqWithThreadRng, ProofSystem};
 
@@ -22,9 +22,9 @@ fn main() {
 
     let msg = ElGamalMessage::from_string::<Sha512>("test".to_string());
 
-    let ctxt = ElGamalWithThreadRng::encrypt(pk, msg, &mut thread_rng());
+    let ctxt = ElGamalWithThreadRng::encrypt(&pk, msg, &mut thread_rng());
 
-    let _ptxt = ElGamalWithThreadRng::decrypt(sk, ctxt);
+    let _ptxt = ElGamalWithThreadRng::decrypt(&sk, ctxt);
 
     let s_1 = Scalar::random(&mut thread_rng());
     let s_2 = Scalar::random(&mut thread_rng());
@@ -34,8 +34,8 @@ fn main() {
     let h_1 = &s_2 * &g_1;
     let h_2 = &s_2 * &g_2;
 
-    let x1 = DlogEqStatement::new(&g_1, &h_1, &g_2, &h_2);
-    let w1 = DlogEqWitness::new(&s_2);
+    let x1 = DlogEqStatement::new(g_1.clone(), h_1.clone(), g_2.clone(), h_2.clone());
+    let w1 = DlogEqWitness::new(s_2.clone());
 
     let p1 = DlogEqWithThreadRng::prove(&x1, &w1, &mut thread_rng());
 
@@ -43,8 +43,8 @@ fn main() {
 
     println!("{:?}", success);
 
-    let x2 = DlogStatement::new(&g_1, &h_1);
-    let w2 = DlogWitness::new(&s_2);
+    let x2 = DlogStatement::new(g_1.clone(), h_1.clone());
+    let w2 = DlogWitness::new(s_2.clone());
 
     let p2 = DlogWithThreadRng::prove(&x2, &w2, &mut thread_rng());
 

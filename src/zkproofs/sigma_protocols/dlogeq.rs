@@ -12,22 +12,22 @@ use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol, SimulatorState}
 use digest::Digest;
 use sha2::Sha512;
 
-pub struct DlogEq<'a, RNG>
+pub struct DlogEq<RNG>
 where
     RNG: RngCore + CryptoRng,
 {
-    phantom_rng: PhantomData<&'a RNG>,
+    phantom_rng: PhantomData<RNG>,
 }
 
-pub struct DlogEqStatement<'a> {
-    g_1: &'a RistrettoPoint,
-    h_1: &'a RistrettoPoint,
-    g_2: &'a RistrettoPoint,
-    h_2: &'a RistrettoPoint,
+pub struct DlogEqStatement {
+    g_1: RistrettoPoint,
+    h_1: RistrettoPoint,
+    g_2: RistrettoPoint,
+    h_2: RistrettoPoint,
 }
 
-pub struct DlogEqWitness<'a> {
-    x: &'a Scalar,
+pub struct DlogEqWitness {
+    x: Scalar,
 }
 
 pub struct DlogEqCommitment {
@@ -56,12 +56,12 @@ impl SimulatorState for DlogEqSimulatorState {
     }
 }
 
-impl<'a> DlogEqStatement<'a> {
+impl DlogEqStatement {
     pub fn new(
-        g_1: &'a RistrettoPoint,
-        h_1: &'a RistrettoPoint,
-        g_2: &'a RistrettoPoint,
-        h_2: &'a RistrettoPoint,
+        g_1: RistrettoPoint,
+        h_1: RistrettoPoint,
+        g_2: RistrettoPoint,
+        h_2: RistrettoPoint,
     ) -> Self {
         DlogEqStatement {
             g_1: g_1,
@@ -75,14 +75,14 @@ impl<'a> DlogEqStatement<'a> {
         let h_1_vfy = witness.x * self.g_1;
         let h_2_vfy = witness.x * self.g_2;
 
-        if self.h_1 == &h_1_vfy && self.h_2 == &h_2_vfy {
+        if self.h_1 == h_1_vfy && self.h_2 == h_2_vfy {
             return true;
         }
         false
     }
 }
 
-impl<DIG> Hashable<DIG> for DlogEqStatement<'_>
+impl<DIG> Hashable<DIG> for DlogEqStatement
 where
     DIG: Digest,
 {
@@ -104,18 +104,18 @@ where
     }
 }
 
-impl<'a> DlogEqWitness<'a> {
-    pub fn new(x: &'a Scalar) -> Self {
+impl DlogEqWitness {
+    pub fn new(x: Scalar) -> Self {
         DlogEqWitness { x: x }
     }
 }
 
-impl<'a, RNG> SigmaProtocol<RNG> for DlogEq<'a, RNG>
+impl<RNG> SigmaProtocol<RNG> for DlogEq<RNG>
 where
     RNG: RngCore + CryptoRng,
 {
-    type S = DlogEqStatement<'a>;
-    type W = DlogEqWitness<'a>;
+    type S = DlogEqStatement;
+    type W = DlogEqWitness;
     type COM = DlogEqCommitment;
     type ST = DlogEqProverState;
     type RSP = DlogEqResponse;
@@ -191,7 +191,7 @@ where
     }
 }
 
-impl<'a, RNG> FsConvertibleSigmaProtocol<RNG, Self> for DlogEq<'a, RNG>
+impl<RNG> FsConvertibleSigmaProtocol<RNG, Self> for DlogEq<RNG>
 where
     RNG: RngCore + CryptoRng,
 {
@@ -217,4 +217,4 @@ where
     }
 }
 
-pub type DlogEqWithThreadRng<'a> = DlogEq<'a, ThreadRng>;
+pub type DlogEqWithThreadRng = DlogEq<ThreadRng>;

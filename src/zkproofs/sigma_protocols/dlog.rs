@@ -13,20 +13,20 @@ use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol, SimulatorState};
 
-pub struct Dlog<'a, RNG>
+pub struct Dlog<RNG>
 where
     RNG: RngCore + CryptoRng,
 {
-    phantom_rng: PhantomData<&'a RNG>,
+    phantom_rng: PhantomData<RNG>,
 }
 
-pub struct DlogStatement<'a> {
-    g_1: &'a RistrettoPoint,
-    h_1: &'a RistrettoPoint,
+pub struct DlogStatement {
+    g_1: RistrettoPoint,
+    h_1: RistrettoPoint,
 }
 
-pub struct DlogWitness<'a> {
-    x: &'a Scalar,
+pub struct DlogWitness {
+    x: Scalar,
 }
 
 pub struct DlogCommitment {
@@ -54,22 +54,22 @@ pub struct DlogProof {
     response: DlogResponse,
 }
 
-impl<'a> DlogStatement<'a> {
-    pub fn new(g_1: &'a RistrettoPoint, h_1: &'a RistrettoPoint) -> Self {
+impl DlogStatement {
+    pub fn new(g_1: RistrettoPoint, h_1: RistrettoPoint) -> Self {
         DlogStatement { g_1: g_1, h_1: h_1 }
     }
 
     fn verify(&self, witness: &DlogWitness) -> bool {
         let h_1_vfy = witness.x * self.g_1;
 
-        if self.h_1 == &h_1_vfy {
+        if self.h_1 == h_1_vfy {
             return true;
         }
         false
     }
 }
 
-impl<DIG> Hashable<DIG> for DlogStatement<'_>
+impl<DIG> Hashable<DIG> for DlogStatement
 where
     DIG: Digest,
 {
@@ -88,18 +88,18 @@ where
     }
 }
 
-impl<'a> DlogWitness<'a> {
-    pub fn new(x: &'a Scalar) -> Self {
+impl DlogWitness {
+    pub fn new(x: Scalar) -> Self {
         DlogWitness { x: x }
     }
 }
 
-impl<'a, RNG> SigmaProtocol<RNG> for Dlog<'a, RNG>
+impl<RNG> SigmaProtocol<RNG> for Dlog<RNG>
 where
     RNG: RngCore + CryptoRng,
 {
-    type S = DlogStatement<'a>;
-    type W = DlogWitness<'a>;
+    type S = DlogStatement;
+    type W = DlogWitness;
     type COM = DlogCommitment;
     type ST = DlogProverState;
     type RSP = DlogResponse;
@@ -168,7 +168,7 @@ where
     }
 }
 
-impl<'a, RNG> FsConvertibleSigmaProtocol<RNG, Self> for Dlog<'a, RNG>
+impl<RNG> FsConvertibleSigmaProtocol<RNG, Self> for Dlog<RNG>
 where
     RNG: RngCore + CryptoRng,
 {
@@ -194,4 +194,4 @@ where
     }
 }
 
-pub type DlogWithThreadRng<'a> = Dlog<'a, ThreadRng>;
+pub type DlogWithThreadRng = Dlog<ThreadRng>;
