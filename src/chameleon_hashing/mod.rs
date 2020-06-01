@@ -3,22 +3,11 @@ pub mod dss_pkc_20;
 use rand::{CryptoRng, RngCore};
 
 #[derive(Debug)]
-pub enum Error {
-  UnsupportedKeyLength(u32),
-}
-
-pub trait SecretKey<RNG: RngCore + CryptoRng> {
-    fn generate(key_len: u32, rng: &mut RNG) -> Result<Self, Error>
-    where
-        Self: Sized;
-}
-
-pub trait PublicKey {
-    type SK;
-
-    fn from_secret(secret_key: &Self::SK) -> Self
-    where
-        Self: Sized;
+pub enum Error<T> 
+where T : std::fmt::Debug + std::fmt::Display
+{
+    UnsupportedKeyLength(u32),
+    ImplementationSpecificError(T),
 }
 
 pub trait ChameleonHash<RNG: RngCore + CryptoRng> {
@@ -27,9 +16,14 @@ pub trait ChameleonHash<RNG: RngCore + CryptoRng> {
     type MSG;
     type RND;
     type CH;
+    type E : std::fmt::Debug + std::fmt::Display;
 
-    fn key_gen(key_len: u32, rng: &mut RNG) -> Result<(Self::SK, Self::PK), Error>;
-    fn hash(public_key: &Self::PK, message: Self::MSG, rng: &mut RNG) -> (Self::CH, Self::RND);
+    fn key_gen(key_len: u32, rng: &mut RNG) -> Result<(Self::SK, Self::PK), Error<Self::E>>;
+    fn hash(
+        public_key: &Self::PK,
+        message: Self::MSG,
+        rng: &mut RNG,
+    ) -> Result<(Self::CH, Self::RND), Error<Self::E>>;
     fn check(
         public_key: &Self::PK,
         message: Self::MSG,
@@ -43,21 +37,26 @@ pub trait ChameleonHash<RNG: RngCore + CryptoRng> {
         randomness: &Self::RND,
         hash: &Self::CH,
         rng: &mut RNG,
-    ) -> Self::RND;
+    ) -> Result<Self::RND, Error<Self::E>>;
 }
 
-impl std::error::Error for Error {
+impl<T> std::error::Error for Error<T> 
+where T : std::fmt::Debug + std::fmt::Display
+{
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         None
     }
 }
 
-impl std::fmt::Display for Error {
+impl<T> std::fmt::Display for Error<T> 
+where T : std::fmt::Debug + std::fmt::Display
+{
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-      match self {
-        Error::UnsupportedKeyLength(key_len) => {
-            write!(f, "Given key length ({} bytes) not supported", key_len)
+        match self {
+            Error::UnsupportedKeyLength(key_len) => {
+                write!(f, "Given key length ({} bytes) not supported", key_len)
+            }
+            Error::ImplementationSpecificError(e) => write!(f, "{}", e),
         }
-      }
     }
 }

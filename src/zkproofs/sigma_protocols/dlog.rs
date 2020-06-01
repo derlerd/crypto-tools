@@ -12,7 +12,7 @@ use std::convert::From;
 
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
-use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol, SimulatorState, Error};
+use crate::zkproofs::sigma_protocols::{Challenge, Error, SigmaProtocol, SimulatorState};
 
 pub struct Dlog<RNG>
 where
@@ -43,7 +43,7 @@ pub struct DlogSimulatorState {
 }
 
 impl From<Scalar> for DlogWitness {
-    fn from(scalar : Scalar) -> DlogWitness {
+    fn from(scalar: Scalar) -> DlogWitness {
         DlogWitness::new(scalar)
     }
 }

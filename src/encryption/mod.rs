@@ -4,7 +4,7 @@ use rand::{CryptoRng, RngCore};
 
 #[derive(Debug)]
 pub enum Error {
-  UnsupportedKeyLength(u32),
+    UnsupportedKeyLength(u32),
 }
 
 pub trait SecretKey<RNG: RngCore + CryptoRng> {
@@ -40,10 +40,10 @@ impl std::error::Error for Error {
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-      match self {
-        Error::UnsupportedKeyLength(key_len) => {
-            write!(f, "Given key length ({} bytes) not supported", key_len)
+        match self {
+            Error::UnsupportedKeyLength(key_len) => {
+                write!(f, "Given key length ({} bytes) not supported", key_len)
+            }
         }
-      }
     }
 }

@@ -12,7 +12,7 @@ use std::convert::From;
 
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
-use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol, SimulatorState, Error};
+use crate::zkproofs::sigma_protocols::{Challenge, Error, SigmaProtocol, SimulatorState};
 
 pub struct DlogEq<RNG>
 where
@@ -50,14 +50,24 @@ pub struct DlogEqSimulatorState {
     response: DlogEqResponse,
 }
 
-impl From<((RistrettoPoint, RistrettoPoint), (RistrettoPoint, RistrettoPoint))> for DlogEqStatement {
-    fn from(tuple : ((RistrettoPoint, RistrettoPoint), (RistrettoPoint, RistrettoPoint))) -> DlogEqStatement {
+impl
+    From<(
+        (RistrettoPoint, RistrettoPoint),
+        (RistrettoPoint, RistrettoPoint),
+    )> for DlogEqStatement
+{
+    fn from(
+        tuple: (
+            (RistrettoPoint, RistrettoPoint),
+            (RistrettoPoint, RistrettoPoint),
+        ),
+    ) -> DlogEqStatement {
         DlogEqStatement::new((tuple.0).0, (tuple.0).1, (tuple.1).0, (tuple.1).1)
     }
 }
 
 impl From<Scalar> for DlogEqWitness {
-    fn from(scalar : Scalar) -> DlogEqWitness {
+    fn from(scalar: Scalar) -> DlogEqWitness {
         DlogEqWitness::new(scalar)
     }
 }

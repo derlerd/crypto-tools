@@ -69,20 +69,19 @@ pub trait SimulatorState {
     fn decompose(self) -> (Challenge, Self::RSP);
 }
 
-impl std::error::Error for Error 
-{   
- fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         None
     }
 }
 
-impl std::fmt::Display for Error 
-{
+impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-      match self {
-        Error::InvalidWitness => {
-            write!(f, "The given witness does not attest membership of the statement in the language.")
+        match self {
+            Error::InvalidWitness => write!(
+                f,
+                "The given witness does not attest membership of the statement in the language."
+            ),
         }
-      }
     }
 }

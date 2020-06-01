@@ -9,7 +9,7 @@ use sha2::Sha512;
 
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
-use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol, SimulatorState, Error};
+use crate::zkproofs::sigma_protocols::{Challenge, Error, SigmaProtocol, SimulatorState};
 
 pub struct OrComposedSigmaProtocol<RNG, P1, P2>
 where
@@ -135,15 +135,15 @@ where
     pub fn compile_witness(
         w1: Option<P1::W>,
         w2: Option<P2::W>,
-    ) -> Option<OrComposedWitness<RNG, P1, P2>> {
+    ) -> Result<OrComposedWitness<RNG, P1, P2>, Error> {
         let w = match (w1, w2) {
             (Some(w1), None) => OrComposedWitness::WitnessP1(w1),
             (None, Some(w2)) => OrComposedWitness::WitnessP2(w2),
             (Some(w1), Some(w2)) => OrComposedWitness::Both((w1, w2)),
-            _ => return None,
+            _ => return Err(Error::InvalidWitness),
         };
 
-        Some(w)
+        Ok(w)
     }
 
     pub fn compile_statement(s1: P1::S, s2: P2::S) -> OrComposedStatement<RNG, P1, P2> {

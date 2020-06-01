@@ -6,8 +6,8 @@ use crate::zkproofs::sigma_protocols::dlog::Dlog;
 use crate::zkproofs::sigma_protocols::dlogeq::DlogEq;
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::or_composition::OrComposedSigmaProtocol;
-use crate::zkproofs::sigma_protocols::SigmaProtocol;
 use crate::zkproofs::sigma_protocols::Error as SigmaProtocolError;
+use crate::zkproofs::sigma_protocols::SigmaProtocol;
 
 use crate::hashing::Hashable;
 
@@ -15,13 +15,13 @@ use sha2::Sha512;
 
 #[derive(Debug)]
 pub enum Error {
-    InvalidWitness
+    InvalidWitness,
 }
 
 impl From<SigmaProtocolError> for Error {
-    fn from(error : SigmaProtocolError) -> Error {
+    fn from(error: SigmaProtocolError) -> Error {
         match error {
-          SigmaProtocolError::InvalidWitness => Error::InvalidWitness
+            SigmaProtocolError::InvalidWitness => Error::InvalidWitness,
         }
     }
 }
@@ -61,21 +61,20 @@ where
     }
 }
 
-impl std::error::Error for Error 
-{   
- fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         None
     }
 }
 
-impl std::fmt::Display for Error 
-{
+impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-      match self {
-        Error::InvalidWitness => {
-            write!(f, "The given witness does not attest membership of the statement in the language.")
+        match self {
+            Error::InvalidWitness => write!(
+                f,
+                "The given witness does not attest membership of the statement in the language."
+            ),
         }
-      }
     }
 }
 
