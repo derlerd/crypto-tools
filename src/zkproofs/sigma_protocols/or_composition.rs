@@ -9,7 +9,7 @@ use sha2::Sha512;
 
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
-use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol, SimulatorState};
+use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol, SimulatorState, Error};
 
 pub struct OrComposedSigmaProtocol<RNG, P1, P2>
 where
@@ -168,28 +168,28 @@ where
         statement: &Self::S,
         witness: &Self::W,
         rng: &mut RNG,
-    ) -> Option<(Self::COM, Self::ST)> {
+    ) -> Result<(Self::COM, Self::ST), Error> {
         match witness {
             OrComposedWitness::WitnessP1(w1) | OrComposedWitness::Both((w1, _)) => {
                 let (c1, st1) = match P1::commit(&statement.0, &w1, rng) {
-                    Some((com, st)) => (com, st),
-                    None => return None,
+                    Ok((com, st)) => (com, st),
+                    Err(e) => return Err(e),
                 };
                 let (c2, st2) = P2::simulate(&statement.1, rng);
 
-                Some((
+                Ok((
                     OrComposedCommitment(c1, c2),
                     OrProverState::SimulatedP2(st1, st2),
                 ))
             }
             OrComposedWitness::WitnessP2(w2) => {
                 let (c2, st2) = match P2::commit(&statement.1, &w2, rng) {
-                    Some((com, st)) => (com, st),
-                    None => return None,
+                    Ok((com, st)) => (com, st),
+                    Err(e) => return Err(e),
                 };
                 let (c1, st1) = P1::simulate(&statement.0, rng);
 
-                Some((
+                Ok((
                     OrComposedCommitment(c1, c2),
                     OrProverState::SimulatedP1(st1, st2),
                 ))

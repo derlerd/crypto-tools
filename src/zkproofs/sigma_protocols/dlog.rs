@@ -12,7 +12,7 @@ use std::convert::From;
 
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
-use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol, SimulatorState};
+use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol, SimulatorState, Error};
 
 pub struct Dlog<RNG>
 where
@@ -116,9 +116,9 @@ where
         statement: &DlogStatement,
         witness: &DlogWitness,
         rng: &mut RNG,
-    ) -> Option<(DlogCommitment, DlogProverState)> {
+    ) -> Result<(DlogCommitment, DlogProverState), Error> {
         if statement.verify(witness) != true {
-            return None;
+            return Err(Error::InvalidWitness);
         }
 
         let r = Scalar::random(rng);
@@ -127,7 +127,7 @@ where
         let state = DlogProverState(r);
         let commitments = DlogCommitment { c1: c1 };
 
-        Some((commitments, state))
+        Ok((commitments, state))
     }
 
     fn challenge(rng: &mut RNG) -> Challenge {

@@ -9,6 +9,11 @@ use std::ops::{Add, Sub};
 
 use rand::{CryptoRng, RngCore};
 
+#[derive(Debug)]
+pub enum Error {
+    InvalidWitness,
+}
+
 pub struct Challenge(Scalar);
 
 impl Sub for &Challenge {
@@ -42,7 +47,7 @@ where
         statement: &Self::S,
         witness: &Self::W,
         rng: &mut RNG,
-    ) -> Option<(Self::COM, Self::ST)>;
+    ) -> Result<(Self::COM, Self::ST), Error>;
     fn challenge(rng: &mut RNG) -> Challenge;
     fn response(
         statement: &Self::S,
@@ -62,4 +67,22 @@ where
 pub trait SimulatorState {
     type RSP;
     fn decompose(self) -> (Challenge, Self::RSP);
+}
+
+impl std::error::Error for Error 
+{   
+ fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
+}
+
+impl std::fmt::Display for Error 
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+      match self {
+        Error::InvalidWitness => {
+            write!(f, "The given witness does not attest membership of the statement in the language.")
+        }
+      }
+    }
 }

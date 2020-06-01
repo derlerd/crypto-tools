@@ -34,8 +34,8 @@ where
 
     fn prove(statement: &Self::S, witness: &Self::W, rng: &mut RNG) -> Option<Self::P> {
         let (com, st) = match SP::commit(statement, witness, rng) {
-            Some((com, st)) => (com, st),
-            None => return None,
+            Ok((com, st)) => (com, st),
+            Err(_) => return None,
         };
 
         let ch = SP::hash_challenge(statement, &com);
