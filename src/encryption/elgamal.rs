@@ -10,7 +10,7 @@ use rand::{CryptoRng, RngCore};
 
 use std::convert::From;
 
-use crate::encryption::{PublicKey, SecretKey};
+use crate::encryption::{PublicKey, SecretKey, Error};
 use crate::zkproofs::sigma_protocols::dlog::{DlogStatement, DlogWitness};
 
 pub struct ElGamal<RNG: RngCore + CryptoRng> {
@@ -21,7 +21,7 @@ pub struct ElGamal<RNG: RngCore + CryptoRng> {
 pub struct ElGamalSecretKey(Scalar);
 
 #[derive(Clone)]
-pub struct ElGamalPublicKey(pub RistrettoPoint);
+pub struct ElGamalPublicKey(RistrettoPoint);
 
 #[derive(Clone)]
 pub struct ElGamalMessage(RistrettoPoint);
@@ -48,13 +48,13 @@ impl From<ElGamalSecretKey> for DlogWitness {
 }
 
 impl<RNG: RngCore + CryptoRng> super::SecretKey<RNG> for ElGamalSecretKey {
-    fn generate(key_len: u32, rng: &mut RNG) -> Option<ElGamalSecretKey> {
+    fn generate(key_len: u32, rng: &mut RNG) -> Result<ElGamalSecretKey, Error> {
         if key_len != 32 {
-            return None;
+            return Err(Error::UnsupportedKeyLength(key_len));
         }
 
         let s = Scalar::random(rng);
-        Some(ElGamalSecretKey(s))
+        Ok(ElGamalSecretKey(s))
     }
 }
 
@@ -72,13 +72,13 @@ impl<RNG: RngCore + CryptoRng> super::EncryptionScheme<RNG> for ElGamal<RNG> {
     type MSG = ElGamalMessage;
     type CTXT = ElGamalCiphertext;
 
-    fn key_gen(key_len: u32, rng: &mut RNG) -> Option<(ElGamalSecretKey, ElGamalPublicKey)> {
+    fn key_gen(key_len: u32, rng: &mut RNG) -> Result<(ElGamalSecretKey, ElGamalPublicKey), Error> {
         let sk = match ElGamalSecretKey::generate(key_len, rng) {
-            Some(key) => key,
-            None => return None,
+            Ok(key) => key,
+            Err(e) => return Err(e),
         };
         let pk = ElGamalPublicKey::from_secret(&sk);
-        Some((sk, pk))
+        Ok((sk, pk))
     }
 
     fn encrypt(

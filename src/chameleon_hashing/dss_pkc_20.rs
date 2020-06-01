@@ -2,7 +2,8 @@ use rand::{CryptoRng, RngCore};
 
 use std::marker::PhantomData;
 
-use crate::chameleon_hashing::ChameleonHash;
+use crate::chameleon_hashing::{ChameleonHash, Error};
+use crate::encryption::Error as EncryptionError;
 use crate::encryption::elgamal::{
     ElGamal, ElGamalCiphertext, ElGamalMessage, ElGamalPublicKey, ElGamalSecretKey,
 };
@@ -14,6 +15,14 @@ pub struct DssPkc20<RNG: RngCore + CryptoRng> {
     phantom_rng: PhantomData<RNG>,
 }
 
+impl From<EncryptionError> for Error {
+    fn from(error : EncryptionError) -> Error {
+        match error {
+            EncryptionError::UnsupportedKeyLength(key_len) => Error::UnsupportedKeyLength(key_len) 
+        }
+    }
+}
+
 impl<RNG: RngCore + CryptoRng> ChameleonHash<RNG> for DssPkc20<RNG> {
     type SK = ElGamalSecretKey;
     type PK = ElGamalPublicKey;
@@ -21,8 +30,10 @@ impl<RNG: RngCore + CryptoRng> ChameleonHash<RNG> for DssPkc20<RNG> {
     type CH = ElGamalCiphertext;
     type RND = <DlOrDlEq<RNG> as ProofSystem<RNG>>::P;
 
-    fn key_gen(key_len: u32, rng: &mut RNG) -> Option<(ElGamalSecretKey, ElGamalPublicKey)> {
-        ElGamal::<RNG>::key_gen(key_len, rng)
+    fn key_gen(key_len: u32, rng: &mut RNG) -> Result<(ElGamalSecretKey, ElGamalPublicKey), Error> {
+        let key_pair = ElGamal::<RNG>::key_gen(key_len, rng)?;
+
+        Ok(key_pair)
     }
 
     fn hash(public_key: &Self::PK, message: Self::MSG, rng: &mut RNG) -> (Self::CH, Self::RND) {
