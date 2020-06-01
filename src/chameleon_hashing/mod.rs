@@ -3,8 +3,9 @@ pub mod dss_pkc_20;
 use rand::{CryptoRng, RngCore};
 
 #[derive(Debug)]
-pub enum Error<T> 
-where T : std::fmt::Debug + std::fmt::Display
+pub enum Error<T>
+where
+    T: std::fmt::Debug + std::fmt::Display,
 {
     UnsupportedKeyLength(u32),
     ImplementationSpecificError(T),
@@ -16,7 +17,7 @@ pub trait ChameleonHash<RNG: RngCore + CryptoRng> {
     type MSG;
     type RND;
     type CH;
-    type E : std::fmt::Debug + std::fmt::Display;
+    type E: std::fmt::Debug + std::fmt::Display;
 
     fn key_gen(key_len: u32, rng: &mut RNG) -> Result<(Self::SK, Self::PK), Error<Self::E>>;
     fn hash(
@@ -40,16 +41,18 @@ pub trait ChameleonHash<RNG: RngCore + CryptoRng> {
     ) -> Result<Self::RND, Error<Self::E>>;
 }
 
-impl<T> std::error::Error for Error<T> 
-where T : std::fmt::Debug + std::fmt::Display
+impl<T> std::error::Error for Error<T>
+where
+    T: std::fmt::Debug + std::fmt::Display,
 {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         None
     }
 }
 
-impl<T> std::fmt::Display for Error<T> 
-where T : std::fmt::Debug + std::fmt::Display
+impl<T> std::fmt::Display for Error<T>
+where
+    T: std::fmt::Debug + std::fmt::Display,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {

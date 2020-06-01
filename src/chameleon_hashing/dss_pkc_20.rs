@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use rand::{CryptoRng, RngCore};
 
 use std::marker::PhantomData;
@@ -19,8 +22,9 @@ pub struct DssPkc20<RNG: RngCore + CryptoRng> {
 
 #[derive(Debug)]
 pub enum DssPkc20Error {
-  ProofSystemError(ProofSystemError),
-  SigmaProtocolError(SigmaProtocolError),
+    ProofSystemError(ProofSystemError),
+    SigmaProtocolError(SigmaProtocolError),
+    InvalidHashError(String),
 }
 
 impl From<EncryptionError> for Error<DssPkc20Error> {
@@ -57,7 +61,10 @@ impl<RNG: RngCore + CryptoRng> ChameleonHash<RNG> for DssPkc20<RNG> {
     type RND = <DlOrDlEq<RNG> as ProofSystem<RNG>>::P;
     type E = DssPkc20Error;
 
-    fn key_gen(key_len: u32, rng: &mut RNG) -> Result<(ElGamalSecretKey, ElGamalPublicKey), Error<DssPkc20Error>> {
+    fn key_gen(
+        key_len: u32,
+        rng: &mut RNG,
+    ) -> Result<(ElGamalSecretKey, ElGamalPublicKey), Error<DssPkc20Error>> {
         let key_pair = ElGamal::<RNG>::key_gen(key_len, rng)?;
 
         Ok(key_pair)
@@ -110,7 +117,9 @@ impl<RNG: RngCore + CryptoRng> ChameleonHash<RNG> for DssPkc20<RNG> {
         rng: &mut RNG,
     ) -> Result<Self::RND, Error<DssPkc20Error>> {
         if Self::check(&secret_key.into(), old_message.clone(), randomness, hash) == false {
-            panic!("{:?}");
+            return Err(Error::ImplementationSpecificError(
+                DssPkc20Error::InvalidHashError("Hash supplied to adapt is invalid".to_string()),
+            ));
         }
 
         let pk: ElGamalPublicKey = secret_key.into();
