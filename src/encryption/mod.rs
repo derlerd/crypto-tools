@@ -23,6 +23,6 @@ pub trait EncryptionScheme<RNG: RngCore + CryptoRng> {
     type CTXT;
 
     fn key_gen(key_len: u32, rng: &mut RNG) -> Option<(Self::SK, Self::PK)>;
-    fn encrypt(public_key: Self::PK, message: Self::MSG, rng: &mut RNG) -> Self::CTXT;
-    fn decrypt(secret_key: Self::SK, ciphertext: Self::CTXT) -> Self::MSG;
+    fn encrypt(public_key: &Self::PK, message: Self::MSG, rng: &mut RNG) -> Self::CTXT;
+    fn decrypt(secret_key: &Self::SK, ciphertext: Self::CTXT) -> Self::MSG;
 }

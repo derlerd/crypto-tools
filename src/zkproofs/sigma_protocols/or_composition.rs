@@ -293,11 +293,11 @@ where
     }
 
     fn unwrap_proof(
-        proof: OrComposedProof<RNG, P1, P2>,
+        proof: &OrComposedProof<RNG, P1, P2>,
     ) -> (
-        OrComposedCommitment<RNG, P1, P2>,
-        OrComposedResponse<RNG, P1, P2>,
+        &OrComposedCommitment<RNG, P1, P2>,
+        &OrComposedResponse<RNG, P1, P2>,
     ) {
-        (proof.commitment, proof.response)
+        (&proof.commitment, &proof.response)
     }
 }

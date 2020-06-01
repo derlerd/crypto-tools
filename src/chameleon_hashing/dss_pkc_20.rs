@@ -1,0 +1,79 @@
+use rand::{CryptoRng, RngCore};
+
+use std::marker::PhantomData;
+
+use crate::chameleon_hashing::ChameleonHash;
+use crate::encryption::elgamal::{
+    ElGamal, ElGamalCiphertext, ElGamalMessage, ElGamalPublicKey, ElGamalSecretKey,
+};
+use crate::encryption::EncryptionScheme;
+use crate::zkproofs::sigma_protocols::dlog::DlogWitness;
+use crate::zkproofs::{DlOrDlEq, ProofSystem};
+
+pub struct DssPkc20<RNG: RngCore + CryptoRng> {
+    phantom_rng: PhantomData<RNG>,
+}
+
+impl<RNG: RngCore + CryptoRng> ChameleonHash<RNG> for DssPkc20<RNG> {
+    type SK = ElGamalSecretKey;
+    type PK = ElGamalPublicKey;
+    type MSG = ElGamalMessage;
+    type CH = ElGamalCiphertext;
+    type RND = <DlOrDlEq<RNG> as ProofSystem<RNG>>::P;
+
+    fn key_gen(key_len: u32, rng: &mut RNG) -> Option<(ElGamalSecretKey, ElGamalPublicKey)> {
+        ElGamal::<RNG>::key_gen(key_len, rng)
+    }
+
+    fn hash(public_key: &Self::PK, message: Self::MSG, rng: &mut RNG) -> (Self::CH, Self::RND) {
+        let (c, r) = ElGamal::<RNG>::encrypt_reveal_randomness(public_key, &message, rng);
+
+        let x1 = public_key.clone().into();
+        
+        let x2 = ElGamal::<RNG>::prepare_well_formedness_proof(public_key.clone(), c.clone(), message).into();
+        let w2 = r.into();
+
+        let x = DlOrDlEq::<RNG>::compile_statement(x1, x2);
+        let w = DlOrDlEq::<RNG>::compile_witness(None, Some(w2)).unwrap();
+
+        let p = DlOrDlEq::<RNG>::prove(&x, &w, rng);
+
+        (c, p.unwrap())
+    }
+    fn check(
+        public_key: &Self::PK,
+        message: Self::MSG,
+        randomness: &Self::RND,
+        hash: &Self::CH,
+    ) -> bool {
+        let x1 = public_key.clone().into();
+        let x2 = ElGamal::<RNG>::prepare_well_formedness_proof(public_key.clone(), hash.clone(), message).into();
+        let x = DlOrDlEq::<RNG>::compile_statement(x1, x2);
+        
+        DlOrDlEq::<RNG>::verify(&x, randomness)
+    }
+    fn adapt(
+        secret_key: &Self::SK,
+        old_message: &Self::MSG,
+        new_message: &Self::MSG,
+        randomness: &Self::RND,
+        hash: &Self::CH,
+        rng: &mut RNG,
+    ) -> Self::RND {
+        if Self::check(&secret_key.into(), old_message.clone(), randomness, hash) == false {
+            panic!("{:?}");
+        }
+    
+        let pk : ElGamalPublicKey = secret_key.into();
+
+        let x1 = pk.clone().into();
+        let x2 = ElGamal::<RNG>::prepare_well_formedness_proof(pk.clone(), hash.clone(), new_message.clone()).into();
+        
+        let w1 : DlogWitness = secret_key.clone().into();
+
+        let x = DlOrDlEq::<RNG>::compile_statement(x1, x2);
+        let w = DlOrDlEq::<RNG>::compile_witness(Some(w1), None).unwrap();
+        
+        DlOrDlEq::<RNG>::prove(&x, &w, rng).unwrap()
+    }
+}

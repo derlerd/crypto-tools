@@ -12,6 +12,7 @@ pub trait Hashable<DIG: Digest> {
     fn hash(&self, state: &mut DIG);
 }
 
+#[allow(dead_code)]
 impl DomainSeparator {
     pub fn from_string(s: String) -> Self {
         DomainSeparator {

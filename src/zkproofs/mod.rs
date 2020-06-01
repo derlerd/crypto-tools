@@ -1,6 +1,5 @@
 pub mod sigma_protocols;
 
-use rand::rngs::ThreadRng;
 use rand::{CryptoRng, RngCore};
 
 use crate::zkproofs::sigma_protocols::dlog::Dlog;
@@ -19,7 +18,7 @@ pub trait ProofSystem<RNG> {
     type P;
 
     fn prove(statement: &Self::S, witness: &Self::W, rng: &mut RNG) -> Option<Self::P>;
-    fn verify(statement: &Self::S, proof: Self::P) -> bool;
+    fn verify(statement: &Self::S, proof: &Self::P) -> bool;
 }
 
 impl<RNG, SP> ProofSystem<RNG> for SP
@@ -46,7 +45,7 @@ where
         Some(SP::compile_proof(com, rsp))
     }
 
-    fn verify(statement: &Self::S, proof: Self::P) -> bool {
+    fn verify(statement: &Self::S, proof: &Self::P) -> bool {
         let (commitment, response) = SP::unwrap_proof(proof);
         let ch = SP::hash_challenge(statement, &commitment);
         SP::check(statement, &commitment, &ch, &response)
@@ -54,5 +53,3 @@ where
 }
 
 pub(crate) type DlOrDlEq<RNG> = OrComposedSigmaProtocol<RNG, Dlog<RNG>, DlogEq<RNG>>;
-
-pub type DlOrDlEqWithThreadRng = DlOrDlEq<ThreadRng>;

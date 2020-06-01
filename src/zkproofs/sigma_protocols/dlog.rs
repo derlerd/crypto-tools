@@ -1,13 +1,14 @@
 use curve25519_dalek::ristretto::RistrettoPoint;
 use curve25519_dalek::scalar::Scalar;
 
-use rand::rngs::ThreadRng;
 use rand::{CryptoRng, RngCore};
 
 use std::marker::PhantomData;
 
 use digest::Digest;
 use sha2::Sha512;
+
+use std::convert::From;
 
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
@@ -39,6 +40,12 @@ pub struct DlogResponse(Scalar);
 pub struct DlogSimulatorState {
     challenge: Challenge,
     response: DlogResponse,
+}
+
+impl From<Scalar> for DlogWitness {
+    fn from(scalar : Scalar) -> DlogWitness {
+        DlogWitness::new(scalar)
+    }
 }
 
 impl SimulatorState for DlogSimulatorState {
@@ -189,9 +196,7 @@ where
         }
     }
 
-    fn unwrap_proof(proof: DlogProof) -> (DlogCommitment, DlogResponse) {
-        (proof.commitment, proof.response)
+    fn unwrap_proof(proof: &DlogProof) -> (&DlogCommitment, &DlogResponse) {
+        (&proof.commitment, &proof.response)
     }
 }
-
-pub type DlogWithThreadRng = Dlog<ThreadRng>;

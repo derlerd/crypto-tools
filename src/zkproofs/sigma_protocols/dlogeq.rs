@@ -1,16 +1,18 @@
 use curve25519_dalek::ristretto::RistrettoPoint;
 use curve25519_dalek::scalar::Scalar;
 
-use rand::rngs::ThreadRng;
 use rand::{CryptoRng, RngCore};
 
 use std::marker::PhantomData;
 
+use digest::Digest;
+use sha2::Sha512;
+
+use std::convert::From;
+
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol, SimulatorState};
-use digest::Digest;
-use sha2::Sha512;
 
 pub struct DlogEq<RNG>
 where
@@ -46,6 +48,18 @@ pub struct DlogEqProof {
 pub struct DlogEqSimulatorState {
     challenge: Challenge,
     response: DlogEqResponse,
+}
+
+impl From<((RistrettoPoint, RistrettoPoint), (RistrettoPoint, RistrettoPoint))> for DlogEqStatement {
+    fn from(tuple : ((RistrettoPoint, RistrettoPoint), (RistrettoPoint, RistrettoPoint))) -> DlogEqStatement {
+        DlogEqStatement::new((tuple.0).0, (tuple.0).1, (tuple.1).0, (tuple.1).1)
+    }
+}
+
+impl From<Scalar> for DlogEqWitness {
+    fn from(scalar : Scalar) -> DlogEqWitness {
+        DlogEqWitness::new(scalar)
+    }
 }
 
 impl SimulatorState for DlogEqSimulatorState {
@@ -212,9 +226,7 @@ where
         }
     }
 
-    fn unwrap_proof(proof: DlogEqProof) -> (DlogEqCommitment, DlogEqResponse) {
-        (proof.commitment, proof.response)
+    fn unwrap_proof(proof: &DlogEqProof) -> (&DlogEqCommitment, &DlogEqResponse) {
+        (&proof.commitment, &proof.response)
     }
 }
-
-pub type DlogEqWithThreadRng = DlogEq<ThreadRng>;
