@@ -1,7 +1,5 @@
 use digest::Digest;
 
-use rand::{CryptoRng, RngCore};
-
 use std::marker::PhantomData;
 
 pub struct DomainSeparator {
@@ -12,20 +10,12 @@ pub trait Hashable<DIG: Digest> {
     fn hash(&self, state: &mut DIG);
 }
 
-#[allow(dead_code)]
 impl DomainSeparator {
     pub fn from_string(s: String) -> Self {
+        let dom_sep = format!("{}{}", s.len().to_string(), s);
         DomainSeparator {
-            bytes: s.into_bytes(),
+            bytes: dom_sep.into_bytes(),
         }
-    }
-
-    pub fn from_bytes(b: Vec<u8>) -> Self {
-        DomainSeparator { bytes: b }
-    }
-
-    pub fn random<RNG: CryptoRng + RngCore>() -> Self {
-        unimplemented!();
     }
 
     pub fn to_bytes(&self) -> &Vec<u8> {

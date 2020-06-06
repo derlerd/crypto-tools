@@ -181,8 +181,12 @@ where
 {
     type FSP = DlogProof;
 
+    fn domain_separator() -> String {
+        format!("{}", "dlog")
+    }
+
     fn hash_challenge(statement: &DlogStatement, commitment: &DlogCommitment) -> Challenge {
-        let dom_sep = DomainSeparator::from_string("dlog".to_string());
+        let dom_sep = DomainSeparator::from_string(Self::domain_separator());
         let mut h = DomainSeparatedHash::<Sha512>::new(dom_sep);
         statement.hash(&mut h);
         commitment.hash(&mut h);

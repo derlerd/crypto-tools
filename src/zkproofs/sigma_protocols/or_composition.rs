@@ -271,11 +271,19 @@ where
 {
     type FSP = OrComposedProof<RNG, P1, P2>;
 
+    fn domain_separator() -> String {
+        format!(
+            "or_composition({},{})",
+            P1::domain_separator(),
+            P2::domain_separator()
+        )
+    }
+
     fn hash_challenge(
         statement: &OrComposedStatement<RNG, P1, P2>,
         commitment: &OrComposedCommitment<RNG, P1, P2>,
     ) -> Challenge {
-        let dom_sep = DomainSeparator::from_string("or_composed".to_string());
+        let dom_sep = DomainSeparator::from_string(Self::domain_separator());
         let mut h = DomainSeparatedHash::<Sha512>::new(dom_sep);
         statement.hash(&mut h);
         commitment.hash(&mut h);
