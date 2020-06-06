@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use curve25519_dalek::ristretto::RistrettoPoint;
 use curve25519_dalek::scalar::Scalar;
 
@@ -8,6 +11,7 @@ use std::marker::PhantomData;
 
 use rand::{CryptoRng, RngCore};
 
+use std::cmp::PartialEq;
 use std::convert::From;
 
 use crate::encryption::{Error, PublicKey, SecretKey};
@@ -17,16 +21,16 @@ pub struct ElGamal<RNG: RngCore + CryptoRng> {
     phantom_rng: PhantomData<RNG>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ElGamalSecretKey(Scalar);
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ElGamalPublicKey(RistrettoPoint);
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ElGamalMessage(RistrettoPoint);
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ElGamalCiphertext(RistrettoPoint, RistrettoPoint);
 
 impl From<ElGamalPublicKey> for DlogStatement {
@@ -129,10 +133,15 @@ impl<RNG: RngCore + CryptoRng> ElGamal<RNG> {
     }
 }
 
+#[allow(dead_code)]
 impl ElGamalMessage {
     pub fn from_string<D: Digest<OutputSize = U64> + Default>(message: String) -> Self {
         let m_zl = Scalar::hash_from_bytes::<D>(message.as_bytes());
         let m_group = &m_zl * &curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT;
         ElGamalMessage(m_group)
+    }
+
+    pub fn random<RNG: RngCore + CryptoRng>(rng: &mut RNG) -> Self {
+        ElGamalMessage(RistrettoPoint::random(rng))
     }
 }
