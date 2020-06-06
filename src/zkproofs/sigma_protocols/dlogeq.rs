@@ -95,7 +95,7 @@ impl DlogEqStatement {
         }
     }
 
-    fn verify(&self, witness: &DlogEqWitness) -> bool {
+    pub fn verify(&self, witness: &DlogEqWitness) -> bool {
         let h_1_vfy = witness.x * self.g_1;
         let h_2_vfy = witness.x * self.g_2;
 

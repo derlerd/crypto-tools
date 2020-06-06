@@ -66,7 +66,7 @@ impl DlogStatement {
         DlogStatement { g_1: g_1, h_1: h_1 }
     }
 
-    fn verify(&self, witness: &DlogWitness) -> bool {
+    pub fn verify(&self, witness: &DlogWitness) -> bool {
         let h_1_vfy = witness.x * self.g_1;
 
         if self.h_1 == h_1_vfy {

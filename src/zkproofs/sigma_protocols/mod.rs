@@ -3,6 +3,9 @@ pub mod dlogeq;
 pub mod fiat_shamir;
 pub mod or_composition;
 
+#[cfg(test)]
+mod tests;
+
 use curve25519_dalek::scalar::Scalar;
 
 use std::ops::{Add, Sub};
