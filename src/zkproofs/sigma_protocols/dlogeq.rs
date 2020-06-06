@@ -3,8 +3,6 @@ use curve25519_dalek::scalar::Scalar;
 
 use rand::{CryptoRng, RngCore};
 
-use std::marker::PhantomData;
-
 use digest::Digest;
 use sha2::Sha512;
 
@@ -14,12 +12,7 @@ use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::{Challenge, Error, SigmaProtocol, SimulatorState};
 
-pub struct DlogEq<RNG>
-where
-    RNG: RngCore + CryptoRng,
-{
-    phantom_rng: PhantomData<RNG>,
-}
+pub struct DlogEq;
 
 pub struct DlogEqStatement {
     g_1: RistrettoPoint,
@@ -134,10 +127,7 @@ impl DlogEqWitness {
     }
 }
 
-impl<RNG> SigmaProtocol<RNG> for DlogEq<RNG>
-where
-    RNG: RngCore + CryptoRng,
-{
+impl SigmaProtocol for DlogEq {
     type S = DlogEqStatement;
     type W = DlogEqWitness;
     type COM = DlogEqCommitment;
@@ -145,7 +135,7 @@ where
     type RSP = DlogEqResponse;
     type STS = DlogEqSimulatorState;
 
-    fn commit(
+    fn commit<RNG: RngCore + CryptoRng>(
         statement: &DlogEqStatement,
         witness: &DlogEqWitness,
         rng: &mut RNG,
@@ -164,7 +154,7 @@ where
         Ok((commitments, state))
     }
 
-    fn challenge(rng: &mut RNG) -> Challenge {
+    fn challenge<RNG: RngCore + CryptoRng>(rng: &mut RNG) -> Challenge {
         Challenge(Scalar::random(rng))
     }
 
@@ -196,7 +186,7 @@ where
         false
     }
 
-    fn simulate(
+    fn simulate<RNG: RngCore + CryptoRng>(
         statement: &DlogEqStatement,
         rng: &mut RNG,
     ) -> (DlogEqCommitment, DlogEqSimulatorState) {
@@ -215,10 +205,7 @@ where
     }
 }
 
-impl<RNG> FsConvertibleSigmaProtocol<RNG, Self> for DlogEq<RNG>
-where
-    RNG: RngCore + CryptoRng,
-{
+impl FsConvertibleSigmaProtocol<Self> for DlogEq {
     type FSP = DlogEqProof;
 
     fn domain_separator() -> String {

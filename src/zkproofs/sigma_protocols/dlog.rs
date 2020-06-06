@@ -3,8 +3,6 @@ use curve25519_dalek::scalar::Scalar;
 
 use rand::{CryptoRng, RngCore};
 
-use std::marker::PhantomData;
-
 use digest::Digest;
 use sha2::Sha512;
 
@@ -14,12 +12,7 @@ use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::{Challenge, Error, SigmaProtocol, SimulatorState};
 
-pub struct Dlog<RNG>
-where
-    RNG: RngCore + CryptoRng,
-{
-    phantom_rng: PhantomData<RNG>,
-}
+pub struct Dlog;
 
 pub struct DlogStatement {
     g_1: RistrettoPoint,
@@ -101,10 +94,7 @@ impl DlogWitness {
     }
 }
 
-impl<RNG> SigmaProtocol<RNG> for Dlog<RNG>
-where
-    RNG: RngCore + CryptoRng,
-{
+impl SigmaProtocol for Dlog {
     type S = DlogStatement;
     type W = DlogWitness;
     type COM = DlogCommitment;
@@ -112,7 +102,7 @@ where
     type RSP = DlogResponse;
     type STS = DlogSimulatorState;
 
-    fn commit(
+    fn commit<RNG: RngCore + CryptoRng>(
         statement: &DlogStatement,
         witness: &DlogWitness,
         rng: &mut RNG,
@@ -130,7 +120,7 @@ where
         Ok((commitments, state))
     }
 
-    fn challenge(rng: &mut RNG) -> Challenge {
+    fn challenge<RNG: RngCore + CryptoRng>(rng: &mut RNG) -> Challenge {
         Challenge(Scalar::random(rng))
     }
 
@@ -160,7 +150,10 @@ where
         false
     }
 
-    fn simulate(statement: &DlogStatement, rng: &mut RNG) -> (DlogCommitment, DlogSimulatorState) {
+    fn simulate<RNG: RngCore + CryptoRng>(
+        statement: &DlogStatement,
+        rng: &mut RNG,
+    ) -> (DlogCommitment, DlogSimulatorState) {
         let ch = Scalar::random(rng);
         let rsp = Scalar::random(rng);
         let com = statement.g_1 * rsp - statement.h_1 * &ch;
@@ -175,10 +168,7 @@ where
     }
 }
 
-impl<RNG> FsConvertibleSigmaProtocol<RNG, Self> for Dlog<RNG>
-where
-    RNG: RngCore + CryptoRng,
-{
+impl FsConvertibleSigmaProtocol<Self> for Dlog {
     type FSP = DlogProof;
 
     fn domain_separator() -> String {

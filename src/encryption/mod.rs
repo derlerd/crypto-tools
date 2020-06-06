@@ -7,8 +7,8 @@ pub enum Error {
     UnsupportedKeyLength(u32),
 }
 
-pub trait SecretKey<RNG: RngCore + CryptoRng> {
-    fn generate(key_len: u32, rng: &mut RNG) -> Result<Self, Error>
+pub trait SecretKey {
+    fn generate<RNG: RngCore + CryptoRng>(key_len: u32, rng: &mut RNG) -> Result<Self, Error>
     where
         Self: Sized;
 }
@@ -21,14 +21,21 @@ pub trait PublicKey {
         Self: Sized;
 }
 
-pub trait EncryptionScheme<RNG: RngCore + CryptoRng> {
+pub trait EncryptionScheme {
     type SK;
     type PK;
     type MSG;
     type CTXT;
 
-    fn key_gen(key_len: u32, rng: &mut RNG) -> Result<(Self::SK, Self::PK), Error>;
-    fn encrypt(public_key: &Self::PK, message: Self::MSG, rng: &mut RNG) -> Self::CTXT;
+    fn key_gen<RNG: RngCore + CryptoRng>(
+        key_len: u32,
+        rng: &mut RNG,
+    ) -> Result<(Self::SK, Self::PK), Error>;
+    fn encrypt<RNG: RngCore + CryptoRng>(
+        public_key: &Self::PK,
+        message: Self::MSG,
+        rng: &mut RNG,
+    ) -> Self::CTXT;
     fn decrypt(secret_key: &Self::SK, ciphertext: Self::CTXT) -> Self::MSG;
 }
 

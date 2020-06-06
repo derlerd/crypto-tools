@@ -1,6 +1,5 @@
 use curve25519_dalek::scalar::Scalar;
 
-use rand::rngs::ThreadRng;
 use rand::thread_rng;
 use sha2::Sha512;
 
@@ -9,15 +8,13 @@ use crate::encryption::EncryptionScheme;
 
 #[test]
 fn key_gen_success() {
-    let (_sk, _pk) =
-        ElGamal::<ThreadRng>::key_gen(32, &mut thread_rng()).expect("Key generation failed");
+    let (_sk, _pk) = ElGamal::key_gen(32, &mut thread_rng()).expect("Key generation failed");
 }
 
 #[test]
 #[should_panic(expected = "Key generation failed")]
 fn key_gen_failure() {
-    let (_sk, _pk) =
-        ElGamal::<ThreadRng>::key_gen(31, &mut thread_rng()).expect("Key generation failed");
+    let (_sk, _pk) = ElGamal::key_gen(31, &mut thread_rng()).expect("Key generation failed");
 }
 
 #[test]
@@ -56,7 +53,7 @@ fn encrypt_decrypt_success() {
 
     let c = ElGamal::encrypt(&pk, m.clone(), &mut thread_rng());
 
-    let m_dec = ElGamal::<ThreadRng>::decrypt(&sk, c);
+    let m_dec = ElGamal::decrypt(&sk, c);
 
     assert_eq!(
         m, m_dec,

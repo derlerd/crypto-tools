@@ -2,7 +2,6 @@ use curve25519_dalek::ristretto::RistrettoPoint;
 use curve25519_dalek::scalar::Scalar;
 
 use digest::Digest;
-use rand::rngs::ThreadRng;
 use rand::thread_rng;
 use sha2::Sha512;
 
@@ -70,9 +69,9 @@ fn test_commit_challenge_response_check() {
 
     let (com, st) = Dlog::commit(&x, &w, &mut thread_rng()).expect("Committing failed");
     let ch = Dlog::challenge(&mut thread_rng());
-    let rsp = Dlog::<ThreadRng>::response(&x, &w, &ch, st);
+    let rsp = Dlog::response(&x, &w, &ch, st);
 
-    assert_eq!(Dlog::<ThreadRng>::check(&x, &com, &ch, &rsp), true);
+    assert_eq!(Dlog::check(&x, &com, &ch, &rsp), true);
 }
 
 #[test]
@@ -92,5 +91,5 @@ fn test_prove_and_verify() {
 
     let p = Dlog::prove(&x, &w, &mut thread_rng()).expect("Proving failed");
 
-    assert_eq!(Dlog::<ThreadRng>::verify(&x, &p), true);
+    assert_eq!(Dlog::verify(&x, &p), true);
 }

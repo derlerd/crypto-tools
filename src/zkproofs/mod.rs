@@ -26,27 +26,34 @@ impl From<SigmaProtocolError> for Error {
     }
 }
 
-pub trait ProofSystem<RNG> {
+pub trait ProofSystem {
     type S;
     type W;
     type P;
 
-    fn prove(statement: &Self::S, witness: &Self::W, rng: &mut RNG) -> Result<Self::P, Error>;
+    fn prove<RNG: RngCore + CryptoRng>(
+        statement: &Self::S,
+        witness: &Self::W,
+        rng: &mut RNG,
+    ) -> Result<Self::P, Error>;
     fn verify(statement: &Self::S, proof: &Self::P) -> bool;
 }
 
-impl<RNG, SP> ProofSystem<RNG> for SP
+impl<SP> ProofSystem for SP
 where
-    RNG: RngCore + CryptoRng,
-    SP: SigmaProtocol<RNG> + FsConvertibleSigmaProtocol<RNG, SP>,
-    <Self as SigmaProtocol<RNG>>::S: Hashable<Sha512>,
-    <Self as SigmaProtocol<RNG>>::COM: Hashable<Sha512>,
+    SP: SigmaProtocol + FsConvertibleSigmaProtocol<SP>,
+    <Self as SigmaProtocol>::S: Hashable<Sha512>,
+    <Self as SigmaProtocol>::COM: Hashable<Sha512>,
 {
     type S = SP::S;
     type W = SP::W;
     type P = SP::FSP;
 
-    fn prove(statement: &Self::S, witness: &Self::W, rng: &mut RNG) -> Result<Self::P, Error> {
+    fn prove<RNG: RngCore + CryptoRng>(
+        statement: &Self::S,
+        witness: &Self::W,
+        rng: &mut RNG,
+    ) -> Result<Self::P, Error> {
         let (com, st) = SP::commit(statement, witness, rng)?;
         let ch = SP::hash_challenge(statement, &com);
         let rsp = SP::response(statement, witness, &ch, st);
@@ -78,4 +85,4 @@ impl std::fmt::Display for Error {
     }
 }
 
-pub(crate) type DlOrDlEq<RNG> = OrComposedSigmaProtocol<RNG, Dlog<RNG>, DlogEq<RNG>>;
+pub(crate) type DlOrDlEq = OrComposedSigmaProtocol<Dlog, DlogEq>;

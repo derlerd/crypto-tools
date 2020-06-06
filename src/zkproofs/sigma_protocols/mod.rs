@@ -35,10 +35,7 @@ impl Add for &Challenge {
     }
 }
 
-pub trait SigmaProtocol<RNG>
-where
-    RNG: RngCore + CryptoRng,
-{
+pub trait SigmaProtocol {
     type S;
     type W;
     type COM;
@@ -46,12 +43,12 @@ where
     type RSP;
     type STS: SimulatorState<RSP = Self::RSP>;
 
-    fn commit(
+    fn commit<RNG: RngCore + CryptoRng>(
         statement: &Self::S,
         witness: &Self::W,
         rng: &mut RNG,
     ) -> Result<(Self::COM, Self::ST), Error>;
-    fn challenge(rng: &mut RNG) -> Challenge;
+    fn challenge<RNG: RngCore + CryptoRng>(rng: &mut RNG) -> Challenge;
     fn response(
         statement: &Self::S,
         witness: &Self::W,
@@ -64,7 +61,10 @@ where
         challenge: &Challenge,
         response: &Self::RSP,
     ) -> bool;
-    fn simulate(statement: &Self::S, rng: &mut RNG) -> (Self::COM, Self::STS);
+    fn simulate<RNG: RngCore + CryptoRng>(
+        statement: &Self::S,
+        rng: &mut RNG,
+    ) -> (Self::COM, Self::STS);
 }
 
 pub trait SimulatorState {

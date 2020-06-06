@@ -7,8 +7,6 @@ use curve25519_dalek::scalar::Scalar;
 use digest::generic_array::typenum::U64;
 use digest::Digest;
 
-use std::marker::PhantomData;
-
 use rand::{CryptoRng, RngCore};
 
 use std::cmp::PartialEq;
@@ -17,9 +15,7 @@ use std::convert::From;
 use crate::encryption::{Error, PublicKey, SecretKey};
 use crate::zkproofs::sigma_protocols::dlog::{DlogStatement, DlogWitness};
 
-pub struct ElGamal<RNG: RngCore + CryptoRng> {
-    phantom_rng: PhantomData<RNG>,
-}
+pub struct ElGamal;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ElGamalSecretKey(Scalar);
@@ -54,8 +50,11 @@ impl From<ElGamalSecretKey> for DlogWitness {
     }
 }
 
-impl<RNG: RngCore + CryptoRng> super::SecretKey<RNG> for ElGamalSecretKey {
-    fn generate(key_len: u32, rng: &mut RNG) -> Result<ElGamalSecretKey, Error> {
+impl super::SecretKey for ElGamalSecretKey {
+    fn generate<RNG: RngCore + CryptoRng>(
+        key_len: u32,
+        rng: &mut RNG,
+    ) -> Result<ElGamalSecretKey, Error> {
         if key_len != 32 {
             return Err(Error::UnsupportedKeyLength(key_len));
         }
@@ -73,13 +72,16 @@ impl super::PublicKey for ElGamalPublicKey {
     }
 }
 
-impl<RNG: RngCore + CryptoRng> super::EncryptionScheme<RNG> for ElGamal<RNG> {
+impl super::EncryptionScheme for ElGamal {
     type SK = ElGamalSecretKey;
     type PK = ElGamalPublicKey;
     type MSG = ElGamalMessage;
     type CTXT = ElGamalCiphertext;
 
-    fn key_gen(key_len: u32, rng: &mut RNG) -> Result<(ElGamalSecretKey, ElGamalPublicKey), Error> {
+    fn key_gen<RNG: RngCore + CryptoRng>(
+        key_len: u32,
+        rng: &mut RNG,
+    ) -> Result<(ElGamalSecretKey, ElGamalPublicKey), Error> {
         let sk = match ElGamalSecretKey::generate(key_len, rng) {
             Ok(key) => key,
             Err(e) => return Err(e),
@@ -88,7 +90,7 @@ impl<RNG: RngCore + CryptoRng> super::EncryptionScheme<RNG> for ElGamal<RNG> {
         Ok((sk, pk))
     }
 
-    fn encrypt(
+    fn encrypt<RNG: RngCore + CryptoRng>(
         public_key: &ElGamalPublicKey,
         message: ElGamalMessage,
         rng: &mut RNG,
@@ -102,8 +104,8 @@ impl<RNG: RngCore + CryptoRng> super::EncryptionScheme<RNG> for ElGamal<RNG> {
     }
 }
 
-impl<RNG: RngCore + CryptoRng> ElGamal<RNG> {
-    pub(crate) fn encrypt_reveal_randomness(
+impl ElGamal {
+    pub(crate) fn encrypt_reveal_randomness<RNG: RngCore + CryptoRng>(
         public_key: &ElGamalPublicKey,
         message: &ElGamalMessage,
         rng: &mut RNG,

@@ -11,7 +11,7 @@ where
     ImplementationSpecificError(T),
 }
 
-pub trait ChameleonHash<RNG: RngCore + CryptoRng> {
+pub trait ChameleonHash {
     type SK;
     type PK;
     type MSG;
@@ -19,8 +19,11 @@ pub trait ChameleonHash<RNG: RngCore + CryptoRng> {
     type CH;
     type E: std::fmt::Debug + std::fmt::Display;
 
-    fn key_gen(key_len: u32, rng: &mut RNG) -> Result<(Self::SK, Self::PK), Error<Self::E>>;
-    fn hash(
+    fn key_gen<RNG: RngCore + CryptoRng>(
+        key_len: u32,
+        rng: &mut RNG,
+    ) -> Result<(Self::SK, Self::PK), Error<Self::E>>;
+    fn hash<RNG: RngCore + CryptoRng>(
         public_key: &Self::PK,
         message: Self::MSG,
         rng: &mut RNG,
@@ -31,7 +34,7 @@ pub trait ChameleonHash<RNG: RngCore + CryptoRng> {
         randomness: &Self::RND,
         hash: &Self::CH,
     ) -> bool;
-    fn adapt(
+    fn adapt<RNG: RngCore + CryptoRng>(
         secret_key: &Self::SK,
         old_message: &Self::MSG,
         new_message: &Self::MSG,
