@@ -26,7 +26,7 @@ impl From<SigmaProtocolError> for Error {
     }
 }
 
-pub trait ProofSystem {
+pub trait FsProofSystem {
     type S;
     type W;
     type P;
@@ -39,7 +39,7 @@ pub trait ProofSystem {
     fn verify(statement: &Self::S, proof: &Self::P) -> bool;
 }
 
-impl<SP> ProofSystem for SP
+impl<SP> FsProofSystem for SP
 where
     SP: SigmaProtocol + FsConvertibleSigmaProtocol<SP>,
     <Self as SigmaProtocol>::S: Hashable<Sha512>,

@@ -9,7 +9,7 @@ use crate::hashing::Hashable;
 use crate::zkproofs::sigma_protocols::dlogeq::{DlogEq, DlogEqStatement, DlogEqWitness};
 use crate::zkproofs::sigma_protocols::{Error, SigmaProtocol};
 use crate::zkproofs::Error as ProofSystemError;
-use crate::zkproofs::ProofSystem;
+use crate::zkproofs::FsProofSystem;
 
 fn create_dlogeq_statement_for_testing() -> (DlogEqStatement, DlogEqWitness) {
     let w = Scalar::random(&mut thread_rng());

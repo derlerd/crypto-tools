@@ -12,7 +12,7 @@ use crate::encryption::Error as EncryptionError;
 use crate::zkproofs::sigma_protocols::dlog::DlogWitness;
 use crate::zkproofs::sigma_protocols::Error as SigmaProtocolError;
 use crate::zkproofs::Error as ProofSystemError;
-use crate::zkproofs::{DlOrDlEq, ProofSystem};
+use crate::zkproofs::{DlOrDlEq, FsProofSystem};
 
 pub struct DssPkc20;
 
@@ -54,7 +54,7 @@ impl ChameleonHash for DssPkc20 {
     type PK = ElGamalPublicKey;
     type MSG = ElGamalMessage;
     type CH = ElGamalCiphertext;
-    type RND = <DlOrDlEq as ProofSystem>::P;
+    type RND = <DlOrDlEq as FsProofSystem>::P;
     type E = DssPkc20Error;
 
     fn key_gen<RNG: RngCore + CryptoRng>(
