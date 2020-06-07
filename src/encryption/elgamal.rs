@@ -72,6 +72,8 @@ impl super::PublicKey for ElGamalPublicKey {
     }
 }
 
+/// Implementation of the [ElGamal](https://doi.org/10.1007%2FBFb0054851) 
+/// public key encryption scheme.
 impl super::EncryptionScheme for ElGamal {
     type SK = ElGamalSecretKey;
     type PK = ElGamalPublicKey;
