@@ -14,11 +14,13 @@ use crate::zkproofs::sigma_protocols::{Challenge, Error, SigmaProtocol, Simulato
 
 pub struct Dlog;
 
+#[derive(Clone)]
 pub struct DlogStatement {
     g_1: RistrettoPoint,
     h_1: RistrettoPoint,
 }
 
+#[derive(Clone)]
 pub struct DlogWitness {
     x: Scalar,
 }
@@ -27,9 +29,13 @@ pub struct DlogCommitment {
     c1: RistrettoPoint,
 }
 
+#[derive(Clone)]
 pub struct DlogProverState(Scalar);
+
+#[derive(Clone)]
 pub struct DlogResponse(Scalar);
 
+#[derive(Clone)]
 pub struct DlogSimulatorState {
     challenge: Challenge,
     response: DlogResponse,

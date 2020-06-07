@@ -17,6 +17,7 @@ pub enum Error {
     InvalidWitness,
 }
 
+#[derive(Clone)]
 pub struct Challenge(Scalar);
 
 impl Sub for &Challenge {

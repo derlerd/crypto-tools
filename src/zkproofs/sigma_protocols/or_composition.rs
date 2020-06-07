@@ -24,22 +24,93 @@ pub enum OrComposedWitness<P1, P2>
 where
     P1: SigmaProtocol,
     P2: SigmaProtocol,
+    <P1 as SigmaProtocol>::W: Clone,
+    <P2 as SigmaProtocol>::W: Clone,
 {
     WitnessP1(P1::W),
     WitnessP2(P2::W),
     Both((P1::W, P2::W)),
 }
 
+impl<P1, P2> Clone for OrComposedWitness<P1, P2>
+where
+    P1: SigmaProtocol,
+    P2: SigmaProtocol,
+    <P1 as SigmaProtocol>::W: Clone,
+    <P2 as SigmaProtocol>::W: Clone,
+{
+    fn clone(&self) -> Self {
+        let ret = match self {
+            OrComposedWitness::WitnessP1(w1) => OrComposedWitness::WitnessP1(w1.clone()),
+            OrComposedWitness::WitnessP2(w2) => OrComposedWitness::WitnessP2(w2.clone()),
+            OrComposedWitness::Both((w1, w2)) => OrComposedWitness::Both((w1.clone(), w2.clone())),
+        };
+
+        ret
+    }
+}
+
 pub enum OrProverState<P1, P2>
 where
     P1: SigmaProtocol,
     P2: SigmaProtocol,
+    <P1 as SigmaProtocol>::ST: Clone,
+    <P2 as SigmaProtocol>::ST: Clone,
+    <P1 as SigmaProtocol>::STS: Clone,
+    <P2 as SigmaProtocol>::STS: Clone,
 {
     SimulatedP1(P1::STS, P2::ST),
     SimulatedP2(P1::ST, P2::STS),
 }
 
-pub struct OrComposedStatement<P1: SigmaProtocol, P2: SigmaProtocol>(P1::S, P2::S);
+impl<P1, P2> Clone for OrProverState<P1, P2>
+where
+    P1: SigmaProtocol,
+    P2: SigmaProtocol,
+    <P1 as SigmaProtocol>::ST: Clone,
+    <P2 as SigmaProtocol>::ST: Clone,
+    <P1 as SigmaProtocol>::STS: Clone,
+    <P2 as SigmaProtocol>::STS: Clone,
+{
+    fn clone(&self) -> Self {
+        let ret = match self {
+            OrProverState::SimulatedP1(sts1, st2) => {
+                OrProverState::SimulatedP1(sts1.clone(), st2.clone())
+            }
+            OrProverState::SimulatedP2(st1, sts2) => {
+                OrProverState::SimulatedP2(st1.clone(), sts2.clone())
+            }
+        };
+
+        ret
+    }
+}
+
+pub struct OrComposedStatement<P1, P2>
+where
+    P1: SigmaProtocol,
+    P2: SigmaProtocol,
+    <P1 as SigmaProtocol>::S: Clone,
+    <P2 as SigmaProtocol>::S: Clone,
+{
+    s1: P1::S,
+    s2: P2::S,
+}
+
+impl<P1, P2> Clone for OrComposedStatement<P1, P2>
+where
+    P1: SigmaProtocol,
+    P2: SigmaProtocol,
+    <P1 as SigmaProtocol>::S: Clone,
+    <P2 as SigmaProtocol>::S: Clone,
+{
+    fn clone(&self) -> Self {
+        OrComposedStatement {
+            s1: self.s1.clone(),
+            s2: self.s2.clone(),
+        }
+    }
+}
 
 pub struct OrComposedCommitment<P1: SigmaProtocol, P2: SigmaProtocol>(P1::COM, P2::COM);
 
@@ -49,13 +120,13 @@ impl<P1, P2, DIG> Hashable<DIG> for OrComposedStatement<P1, P2>
 where
     P1: SigmaProtocol,
     P2: SigmaProtocol,
-    <P1 as SigmaProtocol>::S: Hashable<DIG>,
-    <P2 as SigmaProtocol>::S: Hashable<DIG>,
+    <P1 as SigmaProtocol>::S: Hashable<DIG> + Clone,
+    <P2 as SigmaProtocol>::S: Hashable<DIG> + Clone,
     DIG: Digest,
 {
     fn hash(&self, state: &mut DIG) {
-        self.0.hash(state);
-        self.1.hash(state);
+        self.s1.hash(state);
+        self.s2.hash(state);
     }
 }
 
@@ -109,6 +180,10 @@ impl<P1, P2> OrComposedSigmaProtocol<P1, P2>
 where
     P1: SigmaProtocol,
     P2: SigmaProtocol,
+    <P1 as SigmaProtocol>::S: Clone,
+    <P2 as SigmaProtocol>::S: Clone,
+    <P1 as SigmaProtocol>::W: Clone,
+    <P2 as SigmaProtocol>::W: Clone,
 {
     pub fn compile_witness(
         w1: Option<P1::W>,
@@ -125,7 +200,7 @@ where
     }
 
     pub fn compile_statement(s1: P1::S, s2: P2::S) -> OrComposedStatement<P1, P2> {
-        OrComposedStatement(s1, s2)
+        OrComposedStatement { s1, s2 }
     }
 }
 
@@ -133,6 +208,14 @@ impl<P1, P2> SigmaProtocol for OrComposedSigmaProtocol<P1, P2>
 where
     P1: SigmaProtocol,
     P2: SigmaProtocol,
+    <P1 as SigmaProtocol>::S: Clone,
+    <P2 as SigmaProtocol>::S: Clone,
+    <P1 as SigmaProtocol>::W: Clone,
+    <P2 as SigmaProtocol>::W: Clone,
+    <P1 as SigmaProtocol>::ST: Clone,
+    <P2 as SigmaProtocol>::ST: Clone,
+    <P1 as SigmaProtocol>::STS: Clone,
+    <P2 as SigmaProtocol>::STS: Clone,
 {
     type S = OrComposedStatement<P1, P2>;
     type W = OrComposedWitness<P1, P2>;
@@ -148,11 +231,11 @@ where
     ) -> Result<(Self::COM, Self::ST), Error> {
         match witness {
             OrComposedWitness::WitnessP1(w1) | OrComposedWitness::Both((w1, _)) => {
-                let (c1, st1) = match P1::commit(&statement.0, &w1, rng) {
+                let (c1, st1) = match P1::commit(&statement.s1, &w1, rng) {
                     Ok((com, st)) => (com, st),
                     Err(e) => return Err(e),
                 };
-                let (c2, st2) = P2::simulate(&statement.1, rng);
+                let (c2, st2) = P2::simulate(&statement.s2, rng);
 
                 Ok((
                     OrComposedCommitment(c1, c2),
@@ -160,11 +243,11 @@ where
                 ))
             }
             OrComposedWitness::WitnessP2(w2) => {
-                let (c2, st2) = match P2::commit(&statement.1, &w2, rng) {
+                let (c2, st2) = match P2::commit(&statement.s2, &w2, rng) {
                     Ok((com, st)) => (com, st),
                     Err(e) => return Err(e),
                 };
-                let (c1, st1) = P1::simulate(&statement.0, rng);
+                let (c1, st1) = P1::simulate(&statement.s1, rng);
 
                 Ok((
                     OrComposedCommitment(c1, c2),
@@ -196,7 +279,7 @@ where
                     }
                 };
 
-                let rsp2 = P2::response(&statement.1, w2, &ch2, st2);
+                let rsp2 = P2::response(&statement.s2, w2, &ch2, st2);
 
                 OrComposedResponse(ch1, rsp1, rsp2)
             }
@@ -211,7 +294,7 @@ where
                     }
                 };
 
-                let rsp1 = P1::response(&statement.0, w1, &ch1, st1);
+                let rsp1 = P1::response(&statement.s1, w1, &ch1, st1);
 
                 OrComposedResponse(ch1, rsp1, rsp2)
             }
@@ -227,8 +310,8 @@ where
         let ch1 = &response.0;
         let ch2 = challenge - ch1;
 
-        P1::check(&statement.0, &commitment.0, ch1, &response.1)
-            && P2::check(&statement.1, &commitment.1, &ch2, &response.2)
+        P1::check(&statement.s1, &commitment.0, ch1, &response.1)
+            && P2::check(&statement.s2, &commitment.1, &ch2, &response.2)
     }
 
     fn simulate<RNG: RngCore + CryptoRng>(
@@ -244,10 +327,16 @@ impl<P1, P2, DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG
 where
     P1: SigmaProtocol + FsConvertibleSigmaProtocol<P1, DIG>,
     P2: SigmaProtocol + FsConvertibleSigmaProtocol<P2, DIG>,
-    <P1 as SigmaProtocol>::S: Hashable<DIG>,
-    <P2 as SigmaProtocol>::S: Hashable<DIG>,
+    <P1 as SigmaProtocol>::S: Hashable<DIG> + Clone,
+    <P2 as SigmaProtocol>::S: Hashable<DIG> + Clone,
     <P1 as SigmaProtocol>::COM: Hashable<DIG>,
     <P2 as SigmaProtocol>::COM: Hashable<DIG>,
+    <P1 as SigmaProtocol>::W: Clone,
+    <P2 as SigmaProtocol>::W: Clone,
+    <P1 as SigmaProtocol>::ST: Clone,
+    <P2 as SigmaProtocol>::ST: Clone,
+    <P1 as SigmaProtocol>::STS: Clone,
+    <P2 as SigmaProtocol>::STS: Clone,
 {
     type FSP = OrComposedProof<P1, P2>;
 

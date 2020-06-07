@@ -11,7 +11,7 @@ use crate::zkproofs::sigma_protocols::{Error, SigmaProtocol};
 use crate::zkproofs::Error as ProofSystemError;
 use crate::zkproofs::FsProofSystem;
 
-fn create_dlogeq_statement_for_testing() -> (DlogEqStatement, DlogEqWitness) {
+pub(crate) fn create_dlogeq_statement_for_testing() -> (DlogEqStatement, DlogEqWitness) {
     let w = Scalar::random(&mut thread_rng());
     let base1 = RistrettoPoint::random(&mut thread_rng());
     let base2 = RistrettoPoint::random(&mut thread_rng());
