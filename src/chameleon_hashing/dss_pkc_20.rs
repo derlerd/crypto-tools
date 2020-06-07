@@ -20,8 +20,12 @@ pub struct DssPkc20;
 
 #[derive(Debug)]
 pub enum DssPkc20Error {
+    /// Encapsulates all errors caused by failures related to the used proof system.
     ProofSystemError(ProofSystemError),
+    /// Encapsulates all errors caused by failures related to the used sigma protocol system.
     SigmaProtocolError(SigmaProtocolError),
+    /// Encapsulates errors related to invalid hashes returned by functions where a valid
+    /// hash is a precondition.
     InvalidHashError(String),
 }
 
@@ -51,12 +55,44 @@ impl std::fmt::Display for DssPkc20Error {
     }
 }
 
+/// Implementation of the fully collision-resistant chameleon-hash from
+/// [DSS'20](https://eprint.iacr.org/2020/403.pdf). The implementation
+/// is generic in the sense that is makes black-box use of the implementation 
+/// of two primitives implemented within this crate:
+///
+/// - The [ElGamal](https://doi.org/10.1007%2FBFb0054851) encryption scheme
+/// [here](../encryption/elgamal/struct.ElGamal.html). The key pair of this 
+/// scheme will be an ElGamal key pair, and the hash will be an ElGamal
+/// ciphertext.
+///
+/// - A proof system obtained by [OR-composing](https://doi.org/10.1007/3-540-48658-5_19) 
+///   (1) a sigma protocol to prove knowledge of the discrete logarithm of 
+///   some group element with respect to some basis, and (2) a sigma protocol 
+///   to prove that two group elements contain the same discrete logarithm 
+///   with respect to their bases, and applying the 
+///   [Fiat-Shamir transform](https://doi.org/10.1007%2F3-540-68339-9_33) 
+///   and the [FKMV'12](https://eprint.iacr.org/2012/704.pdf) compiler to it.
+///   The randomness will be such an OR-composed proof.
 impl ChameleonHash for DssPkc20 {
+    /// The secret key of this scheme is an ElGamal secret key.
     type SK = ElGamalSecretKey;
+
+    /// The public key of this scheme is an ElGamal public key.
     type PK = ElGamalPublicKey;
+
+    /// The message space of this scheme is the ElGamal message space.
     type MSG = ElGamalMessage;
+
+    /// The hashes are ElGamal ciphertexts.
     type CH = ElGamalCiphertext;
+
+    /// The randomness are proofs from an OR-composed Fiat-Shamir transformed
+    /// Sigma protocol with the FKMV'12 compiler applied.
     type RND = <DlOrDlEq as FsProofSystem<Sha512>>::P;
+
+    /// The implementation defines a custom, implementation specific error,
+    /// which is used to encapsulate the respective errors from the involved
+    /// primitives.
     type E = DssPkc20Error;
 
     fn key_gen<RNG: RngCore + CryptoRng>(

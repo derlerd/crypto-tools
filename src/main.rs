@@ -1,7 +1,7 @@
-mod chameleon_hashing;
-mod encryption;
-mod hashing;
-mod zkproofs;
+pub mod chameleon_hashing;
+pub mod encryption;
+pub mod hashing;
+pub mod zkproofs;
 
 use rand::thread_rng;
 use sha2::Sha512;
