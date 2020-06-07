@@ -5,8 +5,8 @@ use crate::zkproofs::sigma_protocols::dlog::Dlog;
 use crate::zkproofs::sigma_protocols::dlogeq::DlogEq;
 use crate::zkproofs::sigma_protocols::or_composition::{OrComposedStatement, OrComposedWitness};
 use crate::zkproofs::sigma_protocols::{Error, SigmaProtocol};
-use crate::zkproofs::{DlOrDlEq, FsProofSystem};
 use crate::zkproofs::Error as ZkProofError;
+use crate::zkproofs::{DlOrDlEq, FsProofSystem};
 
 fn get_valid_statement_witness_combinations_for_test() -> Vec<(
     OrComposedStatement<Dlog, DlogEq>,
@@ -99,10 +99,12 @@ fn test_prove_verify() {
 #[test]
 fn test_prove_fails() {
     for (x, _w) in get_valid_statement_witness_combinations_for_test().iter() {
-    	for w in get_random_witness_combinations_for_test().iter() {
+        for w in get_random_witness_combinations_for_test().iter() {
             match <DlOrDlEq as FsProofSystem<Sha512>>::prove(&x, &w, &mut thread_rng()) {
-        	  Err(ZkProofError::InvalidWitness) => continue,
-        	  _ => panic!("Call to prove with witness that is invalid for the given statement succeeded."),
+                Err(ZkProofError::InvalidWitness) => continue,
+                _ => panic!(
+                    "Call to prove with witness that is invalid for the given statement succeeded."
+                ),
             };
         }
     }
