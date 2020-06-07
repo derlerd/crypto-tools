@@ -11,7 +11,8 @@ use crate::zkproofs::sigma_protocols::SigmaProtocol;
 
 use crate::hashing::Hashable;
 
-use sha2::Sha512;
+use digest::generic_array::typenum::U64;
+use digest::Digest;
 
 #[derive(Debug)]
 pub enum Error {
@@ -26,7 +27,7 @@ impl From<SigmaProtocolError> for Error {
     }
 }
 
-pub trait FsProofSystem {
+pub trait FsProofSystem<DIG: Digest<OutputSize = U64>> {
     type S;
     type W;
     type P;
@@ -39,11 +40,12 @@ pub trait FsProofSystem {
     fn verify(statement: &Self::S, proof: &Self::P) -> bool;
 }
 
-impl<SP> FsProofSystem for SP
+impl<SP, DIG> FsProofSystem<DIG> for SP
 where
-    SP: SigmaProtocol + FsConvertibleSigmaProtocol<SP>,
-    <Self as SigmaProtocol>::S: Hashable<Sha512>,
-    <Self as SigmaProtocol>::COM: Hashable<Sha512>,
+    DIG: Digest<OutputSize = U64>,
+    SP: SigmaProtocol + FsConvertibleSigmaProtocol<SP, DIG>,
+    <Self as SigmaProtocol>::S: Hashable<DIG>,
+    <Self as SigmaProtocol>::COM: Hashable<DIG>,
 {
     type S = SP::S;
     type W = SP::W;

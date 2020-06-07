@@ -1,7 +1,11 @@
 use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol};
 
-pub trait FsConvertibleSigmaProtocol<SP>
+use digest::generic_array::typenum::U64;
+use digest::Digest;
+
+pub trait FsConvertibleSigmaProtocol<SP, DIG>
 where
+    DIG: Digest<OutputSize = U64>,
     SP: SigmaProtocol,
 {
     type FSP;

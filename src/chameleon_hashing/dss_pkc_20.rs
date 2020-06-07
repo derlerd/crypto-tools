@@ -14,6 +14,8 @@ use crate::zkproofs::sigma_protocols::Error as SigmaProtocolError;
 use crate::zkproofs::Error as ProofSystemError;
 use crate::zkproofs::{DlOrDlEq, FsProofSystem};
 
+use sha2::Sha512;
+
 pub struct DssPkc20;
 
 #[derive(Debug)]
@@ -54,7 +56,7 @@ impl ChameleonHash for DssPkc20 {
     type PK = ElGamalPublicKey;
     type MSG = ElGamalMessage;
     type CH = ElGamalCiphertext;
-    type RND = <DlOrDlEq as FsProofSystem>::P;
+    type RND = <DlOrDlEq as FsProofSystem<Sha512>>::P;
     type E = DssPkc20Error;
 
     fn key_gen<RNG: RngCore + CryptoRng>(
@@ -82,7 +84,7 @@ impl ChameleonHash for DssPkc20 {
         let x = DlOrDlEq::compile_statement(x1, x2);
         let w = DlOrDlEq::compile_witness(None, Some(w2))?;
 
-        let p = DlOrDlEq::prove(&x, &w, rng)?;
+        let p = <DlOrDlEq as FsProofSystem<Sha512>>::prove(&x, &w, rng)?;
 
         Ok((c, p))
     }
@@ -97,7 +99,7 @@ impl ChameleonHash for DssPkc20 {
             .into();
         let x = DlOrDlEq::compile_statement(x1, x2);
 
-        DlOrDlEq::verify(&x, randomness)
+        <DlOrDlEq as FsProofSystem<Sha512>>::verify(&x, randomness)
     }
     fn adapt<RNG: RngCore + CryptoRng>(
         secret_key: &Self::SK,
@@ -125,7 +127,7 @@ impl ChameleonHash for DssPkc20 {
         let x = DlOrDlEq::compile_statement(x1, x2);
         let w = DlOrDlEq::compile_witness(Some(w1), None)?;
 
-        let p = DlOrDlEq::prove(&x, &w, rng)?;
+        let p = <DlOrDlEq as FsProofSystem<Sha512>>::prove(&x, &w, rng)?;
 
         Ok(p)
     }

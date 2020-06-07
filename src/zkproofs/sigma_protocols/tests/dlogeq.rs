@@ -82,7 +82,7 @@ fn test_prove_fails() {
     let (x, _) = create_dlogeq_statement_for_testing();
     let w = Scalar::random(&mut thread_rng());
 
-    match DlogEq::prove(&x, &w.into(), &mut thread_rng()) {
+    match <DlogEq as FsProofSystem<Sha512>>::prove(&x, &w.into(), &mut thread_rng()) {
         Err(ProofSystemError::InvalidWitness) => return,
         _ => panic!("Expected Error::InvalidWitness"),
     }
@@ -92,7 +92,8 @@ fn test_prove_fails() {
 fn test_prove_and_verify() {
     let (x, w) = create_dlogeq_statement_for_testing();
 
-    let p = DlogEq::prove(&x, &w, &mut thread_rng()).expect("Proving failed");
+    let p = <DlogEq as FsProofSystem<Sha512>>::prove(&x, &w, &mut thread_rng())
+        .expect("Proving failed");
 
-    assert_eq!(DlogEq::verify(&x, &p), true);
+    assert_eq!(<DlogEq as FsProofSystem<Sha512>>::verify(&x, &p), true);
 }

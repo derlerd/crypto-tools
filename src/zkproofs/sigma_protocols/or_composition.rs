@@ -4,8 +4,8 @@ use std::marker::PhantomData;
 
 use rand::{CryptoRng, RngCore};
 
+use digest::generic_array::typenum::U64;
 use digest::Digest;
-use sha2::Sha512;
 
 use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
@@ -239,14 +239,15 @@ where
     }
 }
 
-impl<P1, P2> FsConvertibleSigmaProtocol<Self> for OrComposedSigmaProtocol<P1, P2>
+impl<P1, P2, DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG>
+    for OrComposedSigmaProtocol<P1, P2>
 where
-    P1: SigmaProtocol + FsConvertibleSigmaProtocol<P1>,
-    P2: SigmaProtocol + FsConvertibleSigmaProtocol<P2>,
-    <P1 as SigmaProtocol>::S: Hashable<Sha512>,
-    <P2 as SigmaProtocol>::S: Hashable<Sha512>,
-    <P1 as SigmaProtocol>::COM: Hashable<Sha512>,
-    <P2 as SigmaProtocol>::COM: Hashable<Sha512>,
+    P1: SigmaProtocol + FsConvertibleSigmaProtocol<P1, DIG>,
+    P2: SigmaProtocol + FsConvertibleSigmaProtocol<P2, DIG>,
+    <P1 as SigmaProtocol>::S: Hashable<DIG>,
+    <P2 as SigmaProtocol>::S: Hashable<DIG>,
+    <P1 as SigmaProtocol>::COM: Hashable<DIG>,
+    <P2 as SigmaProtocol>::COM: Hashable<DIG>,
 {
     type FSP = OrComposedProof<P1, P2>;
 
@@ -263,7 +264,7 @@ where
         commitment: &OrComposedCommitment<P1, P2>,
     ) -> Challenge {
         let dom_sep = DomainSeparator::from_string(Self::domain_separator());
-        let mut h = DomainSeparatedHash::<Sha512>::new(dom_sep);
+        let mut h = DomainSeparatedHash::<DIG>::new(dom_sep);
         statement.hash(&mut h);
         commitment.hash(&mut h);
         Challenge(Scalar::from_hash(h))

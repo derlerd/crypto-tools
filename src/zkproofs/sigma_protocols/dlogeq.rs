@@ -3,8 +3,8 @@ use curve25519_dalek::scalar::Scalar;
 
 use rand::{CryptoRng, RngCore};
 
+use digest::generic_array::typenum::U64;
 use digest::Digest;
-use sha2::Sha512;
 
 use std::convert::From;
 
@@ -205,7 +205,7 @@ impl SigmaProtocol for DlogEq {
     }
 }
 
-impl FsConvertibleSigmaProtocol<Self> for DlogEq {
+impl<DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG> for DlogEq {
     type FSP = DlogEqProof;
 
     fn domain_separator() -> String {
@@ -213,8 +213,11 @@ impl FsConvertibleSigmaProtocol<Self> for DlogEq {
     }
 
     fn hash_challenge(statement: &DlogEqStatement, commitment: &DlogEqCommitment) -> Challenge {
-        let dom_sep = DomainSeparator::from_string(Self::domain_separator());
-        let mut h = DomainSeparatedHash::<Sha512>::new(dom_sep);
+        let dom_sep = DomainSeparator::from_string(<Self as FsConvertibleSigmaProtocol<
+            Self,
+            DIG,
+        >>::domain_separator());
+        let mut h = DomainSeparatedHash::<DIG>::new(dom_sep);
         statement.hash(&mut h);
         commitment.hash(&mut h);
         Challenge(Scalar::from_hash(h))
