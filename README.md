@@ -7,8 +7,5 @@ This is currently work in progress and this list collects open TODOs and other t
 
 - Wrap base point s.t. no direct access to ristretto required
 - Abstract out groups
-- Separate primitives into individual modules
-- Error handling
 - Serialization and deserialization
 - Code documentation
-- Make tuples with one element unnamed in dlog.rs
