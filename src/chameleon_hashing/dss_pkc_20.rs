@@ -74,24 +74,14 @@ impl std::fmt::Display for DssPkc20Error {
 ///   and the [FKMV'12](https://eprint.iacr.org/2012/704.pdf) compiler to it.
 ///   The randomness will be such an OR-composed proof.
 impl ChameleonHash for DssPkc20 {
-    /// The secret key of this scheme is an ElGamal secret key.
     type SK = ElGamalSecretKey;
-
-    /// The public key of this scheme is an ElGamal public key.
     type PK = ElGamalPublicKey;
-
-    /// The message space of this scheme is the ElGamal message space.
     type MSG = ElGamalMessage;
-
-    /// The hashes are ElGamal ciphertexts.
     type CH = ElGamalCiphertext;
-
-    /// The randomness are proofs from an OR-composed Fiat-Shamir transformed
-    /// Sigma protocol with the FKMV'12 compiler applied.
     type RND = <DlOrDlEq as FsProofSystem<Sha512>>::P;
 
     /// The implementation defines a custom, implementation specific error,
-    /// which is used to encapsulate the respective errors from the involved
+    /// that is used to encapsulate the respective errors from the involved
     /// primitives.
     type E = DssPkc20Error;
 

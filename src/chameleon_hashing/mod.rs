@@ -15,7 +15,7 @@ where
     ImplementationSpecificError(T),
 }
 
-/// The interface of (secret-coin) chameleon hashes. The interface follows
+/// Represents a (secret-coin) chameleon hash function. The interface follows
 /// the definitions in [DSS'20](https://eprint.iacr.org/2020/403.pdf).
 ///
 /// # Chameleon Hashes
@@ -31,19 +31,19 @@ where
 /// aforementioned paper also analyzes the relations between the existing 
 /// security notions and discusses practical implications. 
 pub trait ChameleonHash {
-    /// The type representing the secret key space
+    /// The secret key space
     type SK;
 
-    /// The type representing the public key space
+    /// The public key space
     type PK;
 
-    /// The type representing the message space
+    /// The message space
     type MSG;
 
-    /// The type representing the randomness space
+    /// The randomness space
     type RND;
 
-    /// The type representing the space of hash values
+    /// The space of hash values
     type CH;
 
     /// An implementation specific error type
