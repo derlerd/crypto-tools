@@ -174,6 +174,9 @@ impl SigmaProtocol for Dlog {
     }
 }
 
+/// Implementation of the FS conversion related functionality for a Sigma protocol 
+/// for the language `S = { (g_1, g_2) | ∃ x : g_1^x = g_2 }`, where `g_1` and `g_2`
+/// are elements of the underlying group.
 impl<DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG> for Dlog {
     type FSP = DlogProof;
 
