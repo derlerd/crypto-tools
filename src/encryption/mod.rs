@@ -1,7 +1,9 @@
+/// The [ElGamal](https://doi.org/10.1007%2FBFb0054851) encryption scheme
 pub mod elgamal;
 
 use rand::{CryptoRng, RngCore};
 
+/// Encryption error type.
 #[derive(Debug)]
 pub enum Error {
     /// The given key length in bytes is not supported by the implementation.
@@ -30,9 +32,9 @@ pub trait PublicKey {
         Self: Sized;
 }
 
-/// Represents a public key encryption scheme. The interface follows 
-/// the interface as it is commonly used in the literature (see, e.g., 
-/// [KL'14](http://www.cs.umd.edu/~jkatz/imc.html)) 
+/// Represents a public key encryption scheme. The interface follows
+/// the interface as it is commonly used in the literature (see, e.g.,
+/// [KL'14](http://www.cs.umd.edu/~jkatz/imc.html))
 pub trait EncryptionScheme {
     /// The secret key space
     type SK;
@@ -47,7 +49,7 @@ pub trait EncryptionScheme {
     type CTXT;
 
     /// Takes a key length `key_len` and a RNG `rng` and generates an
-    /// encryption key pair. It fails with an `UnsupportedKeylength` 
+    /// encryption key pair. It fails with an `UnsupportedKeylength`
     /// error in case the given key length is not supported.
     fn key_gen<RNG: RngCore + CryptoRng>(
         key_len: u32,

@@ -1,3 +1,5 @@
+/// The fully collision-resistant chameleon hash from
+/// [DSS'20](https://eprint.iacr.org/2020/403.pdf).
 pub mod dss_pkc_20;
 
 use rand::{CryptoRng, RngCore};
@@ -10,7 +12,7 @@ where
 {
     /// The given key length in bytes is not supported by the implementation.
     UnsupportedKeyLength(u32),
-    
+
     /// An wrapper for an implementation specific error of type `T`
     ImplementationSpecificError(T),
 }
@@ -25,11 +27,11 @@ where
 /// secret key allows to efficiently find arbitrary collisions.
 ///
 /// # Different Security Notions of Chameleon Hashes
-/// In the literature, different security notions with different strengths 
-/// exist. Recently, the strongest collision resistance notion known to date 
-/// was presented in [DSS'20](https://eprint.iacr.org/2020/403.pdf). The 
-/// aforementioned paper also analyzes the relations between the existing 
-/// security notions and discusses practical implications. 
+/// In the literature, different security notions with different strengths
+/// exist. Recently, the strongest collision resistance notion known to date
+/// was presented in [DSS'20](https://eprint.iacr.org/2020/403.pdf). The
+/// aforementioned paper also analyzes the relations between the existing
+/// security notions and discusses practical implications.
 pub trait ChameleonHash {
     /// The secret key space
     type SK;
@@ -49,13 +51,13 @@ pub trait ChameleonHash {
     /// An implementation specific error type
     type E: std::fmt::Debug + std::fmt::Display;
 
-    /// Takes the desired key length `key_len` in bytes and a RNG `rng`, and 
+    /// Takes the desired key length `key_len` in bytes and a RNG `rng`, and
     /// generates a chameleon hashing key pair or an [Error](enum.Error.html).
     fn key_gen<RNG: RngCore + CryptoRng>(
         key_len: u32,
         rng: &mut RNG,
     ) -> Result<(Self::SK, Self::PK), Error<Self::E>>;
-    
+
     /// Takes a public key `public_key`, a message `message`, and a RNG `rng`,
     /// and returns a hash-randomness tuple or an [Error](enum.Error.html).
     fn hash<RNG: RngCore + CryptoRng>(
@@ -65,8 +67,8 @@ pub trait ChameleonHash {
     ) -> Result<(Self::CH, Self::RND), Error<Self::E>>;
 
     /// Takes a public key `public_key`, a message `message`, a randomness
-    /// `randomness`, and a hash `hash`, and returns `true` if `hash` is 
-    /// considered a valid hash with respect to the other parameters and 
+    /// `randomness`, and a hash `hash`, and returns `true` if `hash` is
+    /// considered a valid hash with respect to the other parameters and
     /// `false` otherwise.
     fn check(
         public_key: &Self::PK,
@@ -77,9 +79,9 @@ pub trait ChameleonHash {
 
     /// Takes a secret key `secret_key`, an old message `old_message`, a
     /// new message `new_message`, a randomness `randomness`, a valid hash
-    /// `hash` for `old_message`, and an RNG `rng`. In case the given `hash` 
-    /// is a valid hash for `old_message` with respect to the other parameters 
-    /// (except `new_message`) it adapts and returns the randomness so that the 
+    /// `hash` for `old_message`, and an RNG `rng`. In case the given `hash`
+    /// is a valid hash for `old_message` with respect to the other parameters
+    /// (except `new_message`) it adapts and returns the randomness so that the
     /// given hash is a valid hash for `new_message`. Otherwise it returns
     /// an error.
     fn adapt<RNG: RngCore + CryptoRng>(

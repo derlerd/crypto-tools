@@ -57,20 +57,20 @@ impl std::fmt::Display for DssPkc20Error {
 
 /// Implementation of the fully collision-resistant chameleon-hash from
 /// [DSS'20](https://eprint.iacr.org/2020/403.pdf). The implementation
-/// is generic in the sense that is makes black-box use of the implementation 
+/// is generic in the sense that is makes black-box use of the implementation
 /// of two primitives implemented within this crate:
 ///
 /// - The [ElGamal](https://doi.org/10.1007%2FBFb0054851) encryption scheme
-/// [here](../encryption/elgamal/struct.ElGamal.html). The key pair of this 
+/// [here](../encryption/elgamal/struct.ElGamal.html). The key pair of this
 /// scheme will be an ElGamal key pair, and the hash will be an ElGamal
 /// ciphertext.
 ///
-/// - A proof system obtained by [OR-composing](https://doi.org/10.1007/3-540-48658-5_19) 
-///   (1) a sigma protocol to prove knowledge of the discrete logarithm of 
-///   some group element with respect to some basis, and (2) a sigma protocol 
-///   to prove that two group elements contain the same discrete logarithm 
-///   with respect to their bases, and applying the 
-///   [Fiat-Shamir transform](https://doi.org/10.1007%2F3-540-68339-9_33) 
+/// - A proof system obtained by [OR-composing](https://doi.org/10.1007/3-540-48658-5_19)
+///   (1) a sigma protocol to prove knowledge of the discrete logarithm of
+///   some group element with respect to some basis, and (2) a sigma protocol
+///   to prove that two group elements contain the same discrete logarithm
+///   with respect to their bases, and applying the
+///   [Fiat-Shamir transform](https://doi.org/10.1007%2F3-540-68339-9_33)
 ///   and the [FKMV'12](https://eprint.iacr.org/2012/704.pdf) compiler to it.
 ///   The randomness will be such an OR-composed proof.
 impl ChameleonHash for DssPkc20 {

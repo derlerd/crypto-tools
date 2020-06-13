@@ -204,6 +204,9 @@ where
     }
 }
 
+/// Generic implementation of an OR composition of two `SigmaProtocols` implementing
+/// the `FsConvertibleSigmaProtocol` trait and satisfying the additional given trait
+/// bounds.
 impl<P1, P2> SigmaProtocol for OrComposedSigmaProtocol<P1, P2>
 where
     P1: SigmaProtocol,
@@ -326,7 +329,7 @@ where
 /// composition of two `SigmaProtocols` implementing the `FsConvertibleSigmaProtocol`
 /// trait and satisfying the additional given trait bounds.
 ///
-/// Intuitively, one can say that if two Sigma protocols are individually FS 
+/// Intuitively, one can say that if two Sigma protocols are individually FS
 /// convertible then so is their OR composition.
 impl<P1, P2, DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG>
     for OrComposedSigmaProtocol<P1, P2>

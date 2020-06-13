@@ -1,6 +1,17 @@
+//! A modular implementation of the [DSS'20](https://eprint.iacr.org/2020/403.pdf).
+//! The reason for why this is written in such a generic way is twofold: First, I
+//! wanted to familiarize myself with more sophisticated Rust concepts and figured
+//! that a hands-on approach would be the best way to do so. Second, the long-term
+//! plan is to keep extending this to a library providing many modern cryptographic
+//! primitives as time permits.
+
+/// Chameleon hashes.
 pub mod chameleon_hashing;
+/// Encryption schemes.
 pub mod encryption;
+/// Convenience functions for hashing.
 pub mod hashing;
+/// Zero-knowledge proofs, Sigma protocols, Fiat-Shamir transformation, Compositions, ...
 pub mod zkproofs;
 
 use rand::thread_rng;

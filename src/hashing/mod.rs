@@ -62,7 +62,7 @@ impl<DIG: Digest> DomainSeparatedHash<DIG> {
 /// Implementation of the Digest trait for a `DomainSeparatedHash`
 /// wrapping some other `Digest`. Essentially this implementation
 /// forwards all calls to the underlying digest and ensures that
-/// for all methods a prior call to the `init` method of 
+/// for all methods a prior call to the `init` method of
 /// `DomainSeparatedHash` happened.
 ///
 /// # Panics

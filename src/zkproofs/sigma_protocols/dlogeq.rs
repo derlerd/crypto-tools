@@ -133,6 +133,10 @@ impl DlogEqWitness {
     }
 }
 
+/// Implementation of a Sigma protocol for the language
+/// `S = { (g_1, g_2, h_1, h_2) | ∃ x : g_1^x = g_2 ∧ h_1^x = h_2 }`,
+/// where `g_1`, g_2`, `h_1`, and `h_2` are elements of the underlying
+/// group.
 impl SigmaProtocol for DlogEq {
     type S = DlogEqStatement;
     type W = DlogEqWitness;
@@ -211,8 +215,8 @@ impl SigmaProtocol for DlogEq {
     }
 }
 
-/// Implementation of the FS conversion related functionality for a Sigma protocol 
-/// for the language `S = { (g_1, g_2, h_1, h_2) | ∃ x : g_1^x = g_2 ∧ h_1^x = h_2 }`, 
+/// Implementation of the FS conversion related functionality for a Sigma protocol
+/// for the language `S = { (g_1, g_2, h_1, h_2) | ∃ x : g_1^x = g_2 ∧ h_1^x = h_2 }`,
 /// where `g_1`, g_2`, `h_1`, and `h_2` are elements of the underlying group.
 impl<DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG> for DlogEq {
     type FSP = DlogEqProof;
