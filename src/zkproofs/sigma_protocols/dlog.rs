@@ -189,7 +189,8 @@ impl<DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG> for Dl
             Self,
             DIG,
         >>::domain_separator());
-        let mut h = DomainSeparatedHash::<DIG>::new(dom_sep);
+        let mut h = DomainSeparatedHash::<DIG>::new();
+        h.init(dom_sep);
         statement.hash(&mut h);
         commitment.hash(&mut h);
         Challenge(Scalar::from_hash(h))

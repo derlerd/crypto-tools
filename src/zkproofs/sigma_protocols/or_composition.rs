@@ -333,10 +333,10 @@ impl<P1, P2, DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG
 where
     P1: SigmaProtocol + FsConvertibleSigmaProtocol<P1, DIG>,
     P2: SigmaProtocol + FsConvertibleSigmaProtocol<P2, DIG>,
-    <P1 as SigmaProtocol>::S: Hashable<DIG> + Clone,
-    <P2 as SigmaProtocol>::S: Hashable<DIG> + Clone,
-    <P1 as SigmaProtocol>::COM: Hashable<DIG>,
-    <P2 as SigmaProtocol>::COM: Hashable<DIG>,
+    <P1 as SigmaProtocol>::S: Hashable<DomainSeparatedHash<DIG>> + Clone,
+    <P2 as SigmaProtocol>::S: Hashable<DomainSeparatedHash<DIG>> + Clone,
+    <P1 as SigmaProtocol>::COM: Hashable<DomainSeparatedHash<DIG>>,
+    <P2 as SigmaProtocol>::COM: Hashable<DomainSeparatedHash<DIG>>,
     <P1 as SigmaProtocol>::W: Clone,
     <P2 as SigmaProtocol>::W: Clone,
     <P1 as SigmaProtocol>::ST: Clone,
@@ -359,7 +359,8 @@ where
         commitment: &OrComposedCommitment<P1, P2>,
     ) -> Challenge {
         let dom_sep = DomainSeparator::from_string(Self::domain_separator());
-        let mut h = DomainSeparatedHash::<DIG>::new(dom_sep);
+        let mut h = DomainSeparatedHash::<DIG>::new();
+        h.init(dom_sep);
         statement.hash(&mut h);
         commitment.hash(&mut h);
         Challenge(Scalar::from_hash(h))
