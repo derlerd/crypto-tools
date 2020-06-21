@@ -153,7 +153,6 @@ impl SigmaProtocol for Dlog {
         let g_1v = commitment.c1 + statement.h_1 * challenge.0;
 
         if g_1s == g_1v {
-            //TODO verify challenge
             return true;
         }
         false

@@ -190,7 +190,6 @@ impl SigmaProtocol for DlogEq {
         let g_2v = commitment.c2 + statement.h_2 * challenge.0;
 
         if g_1s == g_1v && g_2s == g_2v {
-            //TODO verify challenge
             return true;
         }
         false
