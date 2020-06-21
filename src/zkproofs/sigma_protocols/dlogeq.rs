@@ -183,11 +183,11 @@ impl SigmaProtocol for DlogEq {
         challenge: &Challenge,
         response: &DlogEqResponse,
     ) -> bool {
-        let g_1s = statement.g_1 * response.0;
-        let g_2s = statement.g_2 * response.0;
+        let g_1s = &statement.g_1 * &response.0;
+        let g_2s = &statement.g_2 * &response.0;
 
-        let g_1v = commitment.c1 + statement.h_1 * challenge.0;
-        let g_2v = commitment.c2 + statement.h_2 * challenge.0;
+        let g_1v = &commitment.c1 + &statement.h_1 * &challenge.0;
+        let g_2v = &commitment.c2 + &statement.h_2 * &challenge.0;
 
         if g_1s == g_1v && g_2s == g_2v {
             return true;
