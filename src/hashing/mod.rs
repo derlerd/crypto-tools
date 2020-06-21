@@ -53,7 +53,7 @@ impl<DIG: Digest> DomainSeparatedHash<DIG> {
     }
 
     fn check_initialized(&self) {
-        if self.initialized == false {
+        if !self.initialized {
             panic!("DomainSeparatedHash not initialized");
         }
     }

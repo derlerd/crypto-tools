@@ -4,9 +4,8 @@ use sha2::Sha256;
 use crate::hashing::{DomainSeparatedHash, DomainSeparator};
 
 fn assert_fn_panics<F: FnOnce() + std::panic::UnwindSafe>(f: F) {
-    match std::panic::catch_unwind(f) {
-        Ok(_) => panic!("Expected call to fail but it succeeded"),
-        _ => return,
+    if std::panic::catch_unwind(f).is_ok() {
+        panic!("Expected call to fail but it succeeded");
     }
 }
 

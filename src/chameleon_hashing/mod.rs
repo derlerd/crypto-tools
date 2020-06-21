@@ -17,6 +17,8 @@ where
     ImplementationSpecificError(T),
 }
 
+type ResultTuple<ResultA, ResultB, Error> = Result<(ResultA, ResultB), Error>;
+
 /// Represents a (secret-coin) chameleon hash function. The interface follows
 /// the definitions in [DSS'20](https://eprint.iacr.org/2020/403.pdf).
 ///
@@ -56,7 +58,7 @@ pub trait ChameleonHash {
     fn key_gen<RNG: RngCore + CryptoRng>(
         key_len: u32,
         rng: &mut RNG,
-    ) -> Result<(Self::SK, Self::PK), Error<Self::E>>;
+    ) -> ResultTuple<Self::SK, Self::PK, Error<Self::E>>;
 
     /// Takes a public key `public_key`, a message `message`, and a RNG `rng`,
     /// and returns a hash-randomness tuple or an [Error](enum.Error.html).
@@ -64,7 +66,7 @@ pub trait ChameleonHash {
         public_key: &Self::PK,
         message: Self::MSG,
         rng: &mut RNG,
-    ) -> Result<(Self::CH, Self::RND), Error<Self::E>>;
+    ) -> ResultTuple<Self::CH, Self::RND, Error<Self::E>>;
 
     /// Takes a public key `public_key`, a message `message`, a randomness
     /// `randomness`, and a hash `hash`, and returns `true` if `hash` is

@@ -62,7 +62,7 @@ pub struct DlogProof {
 
 impl DlogStatement {
     pub fn new(g_1: RistrettoPoint, h_1: RistrettoPoint) -> Self {
-        DlogStatement { g_1: g_1, h_1: h_1 }
+        DlogStatement { g_1, h_1 }
     }
 
     pub fn verify(&self, witness: &DlogWitness) -> bool {
@@ -96,7 +96,7 @@ where
 
 impl DlogWitness {
     pub fn new(x: Scalar) -> Self {
-        DlogWitness { x: x }
+        DlogWitness { x }
     }
 }
 
@@ -116,7 +116,7 @@ impl SigmaProtocol for Dlog {
         witness: &DlogWitness,
         rng: &mut RNG,
     ) -> Result<(DlogCommitment, DlogProverState), Error> {
-        if statement.verify(witness) != true {
+        if !statement.verify(witness) {
             return Err(Error::InvalidWitness);
         }
 
@@ -124,7 +124,7 @@ impl SigmaProtocol for Dlog {
         let c1 = &r * statement.g_1;
 
         let state = DlogProverState(r);
-        let commitments = DlogCommitment { c1: c1 };
+        let commitments = DlogCommitment { c1 };
 
         Ok((commitments, state))
     }
@@ -152,7 +152,7 @@ impl SigmaProtocol for Dlog {
 
         let g_1v = commitment.c1 + statement.h_1 * challenge.0;
 
-        if &g_1s == &g_1v {
+        if g_1s == g_1v {
             //TODO verify challenge
             return true;
         }
@@ -184,7 +184,7 @@ impl<DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG> for Dl
     type FSP = DlogProof;
 
     fn domain_separator() -> String {
-        format!("{}", "dlog")
+        "dlog".to_string()
     }
 
     fn hash_challenge(statement: &DlogStatement, commitment: &DlogCommitment) -> Challenge {
@@ -201,8 +201,8 @@ impl<DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG> for Dl
 
     fn compile_proof(commitment: DlogCommitment, response: DlogResponse) -> DlogProof {
         DlogProof {
-            commitment: commitment,
-            response: response,
+            commitment,
+            response,
         }
     }
 

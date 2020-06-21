@@ -29,7 +29,7 @@ fn hash_statement_for_testing(x: DlogStatement) -> Vec<u8> {
 fn test_valid_statement() {
     let (x, w) = create_dlog_statement_for_testing();
 
-    assert_eq!(x.verify(&w.into()), true);
+    assert_eq!(x.verify(&w), true);
 }
 
 #[test]
@@ -58,7 +58,7 @@ fn test_commit_fail() {
     let w = Scalar::random(&mut thread_rng());
 
     match Dlog::commit(&x, &w.into(), &mut thread_rng()) {
-        Err(Error::InvalidWitness) => return,
+        Err(Error::InvalidWitness) => {},
         _ => panic!("Expected Error::InvalidWitness."),
     }
 }
@@ -80,7 +80,7 @@ fn test_prove_fails() {
     let w = Scalar::random(&mut thread_rng());
 
     match <Dlog as FsProofSystem<Sha512>>::prove(&x, &w.into(), &mut thread_rng()) {
-        Err(ProofSystemError::InvalidWitness) => return,
+        Err(ProofSystemError::InvalidWitness) => {},
         _ => panic!("Expected Error::InvalidWitness"),
     }
 }

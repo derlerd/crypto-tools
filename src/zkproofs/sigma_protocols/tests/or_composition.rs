@@ -46,7 +46,7 @@ fn get_random_witness_combinations_for_test() -> Vec<OrComposedWitness<Dlog, Dlo
 #[test]
 fn test_bad_witness() {
     match DlOrDlEq::compile_witness(None, None) {
-        Err(Error::InvalidWitness) => return,
+        Err(Error::InvalidWitness) => {},
         _ => panic!("Passed (None, None) to compile_witness but it didn't fail."),
     };
 }
@@ -57,6 +57,7 @@ fn test_commit_challenge_check() {
         let (com, st) = DlOrDlEq::commit(&x, &w, &mut thread_rng()).expect("Committing failed");
         let ch = DlOrDlEq::challenge(&mut thread_rng());
         let rsp = DlOrDlEq::response(&x, &w, &ch, st);
+
 
         assert_eq!(DlOrDlEq::check(&x, &com, &ch, &rsp), true);
     }
@@ -89,10 +90,8 @@ fn test_prove_verify() {
     for (x, w) in get_valid_statement_witness_combinations_for_test().iter() {
         let p = <DlOrDlEq as FsProofSystem<Sha512>>::prove(&x, &w, &mut thread_rng())
             .expect("Proving valid statement failed");
-        match <DlOrDlEq as FsProofSystem<Sha512>>::verify(&x, &p) {
-            true => continue,
-            _ => panic!("Expected that proof verification succeeds but it failed."),
-        };
+        
+        assert_eq!(<DlOrDlEq as FsProofSystem<Sha512>>::verify(&x, &p), true, "Expected that proof verification succeeds but it failed.");
     }
 }
 

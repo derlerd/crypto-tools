@@ -40,13 +40,11 @@ where
     <P2 as SigmaProtocol>::W: Clone,
 {
     fn clone(&self) -> Self {
-        let ret = match self {
+        match self {
             OrComposedWitness::WitnessP1(w1) => OrComposedWitness::WitnessP1(w1.clone()),
             OrComposedWitness::WitnessP2(w2) => OrComposedWitness::WitnessP2(w2.clone()),
             OrComposedWitness::Both((w1, w2)) => OrComposedWitness::Both((w1.clone(), w2.clone())),
-        };
-
-        ret
+        }
     }
 }
 
@@ -73,16 +71,14 @@ where
     <P2 as SigmaProtocol>::STS: Clone,
 {
     fn clone(&self) -> Self {
-        let ret = match self {
+        match self {
             OrProverState::SimulatedP1(sts1, st2) => {
                 OrProverState::SimulatedP1(sts1.clone(), st2.clone())
             }
             OrProverState::SimulatedP2(st1, sts2) => {
                 OrProverState::SimulatedP2(st1.clone(), sts2.clone())
             }
-        };
-
-        ret
+        }
     }
 }
 
@@ -374,8 +370,8 @@ where
         response: OrComposedResponse<P1, P2>,
     ) -> OrComposedProof<P1, P2> {
         OrComposedProof {
-            commitment: commitment,
-            response: response,
+            commitment,
+            response,
         }
     }
 

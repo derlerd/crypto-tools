@@ -87,10 +87,10 @@ impl DlogEqStatement {
         h_2: RistrettoPoint,
     ) -> Self {
         DlogEqStatement {
-            g_1: g_1,
-            h_1: h_1,
-            g_2: g_2,
-            h_2: h_2,
+            g_1,
+            h_1,
+            g_2,
+            h_2,
         }
     }
 
@@ -129,7 +129,7 @@ where
 
 impl DlogEqWitness {
     pub fn new(x: Scalar) -> Self {
-        DlogEqWitness { x: x }
+        DlogEqWitness { x }
     }
 }
 
@@ -150,7 +150,7 @@ impl SigmaProtocol for DlogEq {
         witness: &DlogEqWitness,
         rng: &mut RNG,
     ) -> Result<(DlogEqCommitment, DlogEqProverState), Error> {
-        if statement.verify(witness) != true {
+        if !statement.verify(witness) {
             return Err(Error::InvalidWitness);
         }
 
@@ -159,7 +159,7 @@ impl SigmaProtocol for DlogEq {
         let c2 = &r * statement.g_2;
 
         let state = DlogEqProverState(r);
-        let commitments = DlogEqCommitment { c1: c1, c2: c2 };
+        let commitments = DlogEqCommitment { c1, c2 };
 
         Ok((commitments, state))
     }
@@ -189,7 +189,7 @@ impl SigmaProtocol for DlogEq {
         let g_1v = commitment.c1 + statement.h_1 * challenge.0;
         let g_2v = commitment.c2 + statement.h_2 * challenge.0;
 
-        if &g_1s == &g_1v && &g_2s == &g_2v {
+        if g_1s == g_1v && g_2s == g_2v {
             //TODO verify challenge
             return true;
         }
@@ -202,11 +202,11 @@ impl SigmaProtocol for DlogEq {
     ) -> (DlogEqCommitment, DlogEqSimulatorState) {
         let ch = Scalar::random(rng);
         let rsp = Scalar::random(rng);
-        let c1 = statement.g_1 * rsp - statement.h_1 * &ch;
-        let c2 = statement.g_2 * rsp - statement.h_2 * &ch;
+        let c1 = &statement.g_1 * &rsp - &statement.h_1 * &ch;
+        let c2 = &statement.g_2 * &rsp - &statement.h_2 * &ch;
 
         (
-            DlogEqCommitment { c1: c1, c2: c2 },
+            DlogEqCommitment { c1, c2 },
             DlogEqSimulatorState {
                 challenge: Challenge(ch),
                 response: DlogEqResponse(rsp),
@@ -222,7 +222,7 @@ impl<DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG> for Dl
     type FSP = DlogEqProof;
 
     fn domain_separator() -> String {
-        format!("{}", "dlogeq")
+        "dlogeq".to_string()
     }
 
     fn hash_challenge(statement: &DlogEqStatement, commitment: &DlogEqCommitment) -> Challenge {
@@ -239,8 +239,8 @@ impl<DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG> for Dl
 
     fn compile_proof(commitment: DlogEqCommitment, response: DlogEqResponse) -> DlogEqProof {
         DlogEqProof {
-            commitment: commitment,
-            response: response,
+            commitment,
+            response,
         }
     }
 

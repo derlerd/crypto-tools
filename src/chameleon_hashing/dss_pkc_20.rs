@@ -99,20 +99,20 @@ impl ChameleonHash for DssPkc20 {
         message: Self::MSG,
         rng: &mut RNG,
     ) -> Result<(Self::CH, Self::RND), Error<DssPkc20Error>> {
-        let (c, r) = ElGamal::encrypt_reveal_randomness(public_key, &message, rng);
+        let (ciphertext, randomness) = ElGamal::encrypt_reveal_randomness(public_key, &message, rng);
 
         let x1 = public_key.clone().into();
 
         let x2 =
-            ElGamal::prepare_well_formedness_proof(public_key.clone(), c.clone(), message).into();
-        let w2 = r.into();
+            ElGamal::prepare_well_formedness_proof(public_key.clone(), ciphertext.clone(), message).into();
+        let w2 = randomness.into();
 
-        let x = DlOrDlEq::compile_statement(x1, x2);
-        let w = DlOrDlEq::compile_witness(None, Some(w2))?;
+        let statement = DlOrDlEq::compile_statement(x1, x2);
+        let witness = DlOrDlEq::compile_witness(None, Some(w2))?;
 
-        let p = <DlOrDlEq as FsProofSystem<Sha512>>::prove(&x, &w, rng)?;
+        let proof = <DlOrDlEq as FsProofSystem<Sha512>>::prove(&statement, &witness, rng)?;
 
-        Ok((c, p))
+        Ok((ciphertext, proof))
     }
     fn check(
         public_key: &Self::PK,
@@ -135,7 +135,7 @@ impl ChameleonHash for DssPkc20 {
         hash: &Self::CH,
         rng: &mut RNG,
     ) -> Result<Self::RND, Error<DssPkc20Error>> {
-        if Self::check(&secret_key.into(), old_message.clone(), randomness, hash) == false {
+        if !Self::check(&secret_key.into(), old_message.clone(), randomness, hash) {
             return Err(Error::ImplementationSpecificError(
                 DssPkc20Error::InvalidHashError("Hash supplied to adapt is invalid".to_string()),
             ));

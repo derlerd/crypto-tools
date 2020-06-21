@@ -32,7 +32,7 @@ pub struct ElGamalCiphertext(RistrettoPoint, RistrettoPoint);
 impl From<ElGamalPublicKey> for DlogStatement {
     fn from(public_key: ElGamalPublicKey) -> DlogStatement {
         DlogStatement::new(
-            curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT.clone(),
+            curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT,
             public_key.0,
         )
     }
