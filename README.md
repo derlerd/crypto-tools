@@ -5,8 +5,8 @@ _WARNING: This code is currently work in progress and not intended for productio
 
 ## TODO 
 
-This is currently work in progress and this list collects open TODOs and other things which came to mind during implementation.
+The list below collects open TODOs and other future plans:
 
-- Abstract out groups so that implementation is generic over which groups are used. 
+- Abstract out groups so that implementation is generic over which groups are used
 - Serialization and deserialization logic
 - In-depth review
