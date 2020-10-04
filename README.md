@@ -1,4 +1,4 @@
-# Modern Crypto Tools Library
+# Modern Crypto Tools
 
 The goal of this library is to provide efficient and easy to use implementations of various modern cryptographic tools. We put a special focus on getting abstractions right in the sense that generic transformations known from the cryptographic literature can also be generically implemented. This minimizes (1) the amount of code that needs to be written to add an implementation of a new scheme, as well as (2) the potential to introduce errors when implementing the same "generic" transformations individually for every scheme. 
 
