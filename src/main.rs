@@ -5,11 +5,10 @@
 //! plan is to keep extending this to a library providing many modern cryptographic
 //! primitives as time permits.
 
-
-// We allow clippy::op_ref for some of the modules, because this warning fires 
-// when calling `&a * &b` when `a` and `b` are copy types. The warning suggests 
-// to do `a * b` instead but this would cause an implicit copy of the object 
-// in some cases, resulting in a performance penalty.  
+// We allow clippy::op_ref for some of the modules, because this warning fires
+// when calling `&a * &b` when `a` and `b` are copy types. The warning suggests
+// to do `a * b` instead but this would cause an implicit copy of the object
+// in some cases, resulting in a performance penalty.
 //
 /// Chameleon hashes.
 #[allow(clippy::op_ref)]

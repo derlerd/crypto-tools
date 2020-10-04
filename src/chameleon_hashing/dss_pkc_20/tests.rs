@@ -81,7 +81,7 @@ fn hash_adapt_invalid_hash() {
 
     let msg_adapted = ElGamalMessage::from_string::<Sha512>("Adapted".to_string());
     match DssPkc20::adapt(&sk, &msg_adapted, &msg_adapted, &r, &h, &mut thread_rng()) {
-        Err(Error::ImplementationSpecificError(DssPkc20Error::InvalidHashError(_))) => {},
+        Err(Error::ImplementationSpecificError(DssPkc20Error::InvalidHashError(_))) => {}
         _ => panic!("Hash adaption of invalid hash failed: expected `InvalidHashError`."),
     };
 }
@@ -99,7 +99,7 @@ fn hash_adapt_invalid_key() {
     let (sk, _pk) = DssPkc20::key_gen(32, &mut thread_rng()).unwrap();
 
     match DssPkc20::adapt(&sk, &msg_adapted, &msg_adapted, &r, &h, &mut thread_rng()) {
-        Err(Error::ImplementationSpecificError(DssPkc20Error::InvalidHashError(_))) => {},
+        Err(Error::ImplementationSpecificError(DssPkc20Error::InvalidHashError(_))) => {}
         _ => panic!("Hash adaption of invalid hash failed: expected `InvalidHashError`."),
     };
 }

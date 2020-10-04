@@ -58,7 +58,7 @@ fn test_commit_fail() {
     let w = Scalar::random(&mut thread_rng());
 
     match Dlog::commit(&x, &w.into(), &mut thread_rng()) {
-        Err(Error::InvalidWitness) => {},
+        Err(Error::InvalidWitness) => {}
         _ => panic!("Expected Error::InvalidWitness."),
     }
 }
@@ -80,7 +80,7 @@ fn test_prove_fails() {
     let w = Scalar::random(&mut thread_rng());
 
     match <Dlog as FsProofSystem<Sha512>>::prove(&x, &w.into(), &mut thread_rng()) {
-        Err(ProofSystemError::InvalidWitness) => {},
+        Err(ProofSystemError::InvalidWitness) => {}
         _ => panic!("Expected Error::InvalidWitness"),
     }
 }

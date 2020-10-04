@@ -105,8 +105,7 @@ where
 
     fn verify(statement: &Self::S, proof: &Self::P) -> bool {
         let (commitment, response) = SP::unwrap_proof(proof);
-        let ch =
-            <Self as FsConvertibleSigmaProtocol<SP, DIG>>::hash_challenge(statement, &commitment);
+        let ch = SP::hash_challenge(statement, &commitment);
         SP::check(statement, &commitment, &ch, &response)
     }
 }

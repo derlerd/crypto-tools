@@ -99,12 +99,14 @@ impl ChameleonHash for DssPkc20 {
         message: Self::MSG,
         rng: &mut RNG,
     ) -> Result<(Self::CH, Self::RND), Error<DssPkc20Error>> {
-        let (ciphertext, randomness) = ElGamal::encrypt_reveal_randomness(public_key, &message, rng);
+        let (ciphertext, randomness) =
+            ElGamal::encrypt_reveal_randomness(public_key, &message, rng);
 
         let x1 = public_key.clone().into();
 
         let x2 =
-            ElGamal::prepare_well_formedness_proof(public_key.clone(), ciphertext.clone(), message).into();
+            ElGamal::prepare_well_formedness_proof(public_key.clone(), ciphertext.clone(), message)
+                .into();
         let w2 = randomness.into();
 
         let statement = DlOrDlEq::compile_statement(x1, x2);

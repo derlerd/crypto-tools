@@ -86,12 +86,7 @@ impl DlogEqStatement {
         g_2: RistrettoPoint,
         h_2: RistrettoPoint,
     ) -> Self {
-        DlogEqStatement {
-            g_1,
-            h_1,
-            g_2,
-            h_2,
-        }
+        DlogEqStatement { g_1, h_1, g_2, h_2 }
     }
 
     pub fn verify(&self, witness: &DlogEqWitness) -> bool {
