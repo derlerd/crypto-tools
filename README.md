@@ -13,7 +13,7 @@ _WARNING: This code is currently work in progress and not intended for productio
 - Common trait that allows to define how certain objects should be hashed ([`Hashable`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/hashing/mod.rs#L13)). 
 - Chameleon hash functions ([`ChameleonHash`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/chameleon_hashing/mod.rs#L37)).
 
-Note that we currently fix the [`Ristretto group`](https://ristretto.group/) as the used prime order group and use the implementation provided by the [curve25519-dalek library](https://github.com/dalek-cryptography/curve25519-dalek). In the future we plan to introduce an abstraction layer to allow use of this library with arbitrary prime-order groups. 
+Note that we currently fix the [Ristretto group](https://ristretto.group/) as the used prime order group and use the implementation provided by the [curve25519-dalek library](https://github.com/dalek-cryptography/curve25519-dalek). In the future we plan to introduce an abstraction layer to allow use of this library with arbitrary prime-order groups. 
 
 ## Implementations 
 
