@@ -1,5 +1,5 @@
 [package]
-name = "ch-full"
+name = "modern-crypto-tools"
 version = "0.1.0"
 authors = ["David Derler <david@derler.info>"]
 edition = "2018"

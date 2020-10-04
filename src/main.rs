@@ -1,9 +1,4 @@
-//! A modular implementation of the [DSS'20](https://eprint.iacr.org/2020/403.pdf).
-//! The reason for why this is written in such a generic way is twofold: First, I
-//! wanted to familiarize myself with more sophisticated Rust concepts and figured
-//! that a hands-on approach would be the best way to do so. Second, the long-term
-//! plan is to keep extending this to a library providing many modern cryptographic
-//! primitives as time permits.
+//! A modular implementation various modern cryptographic tools and primitives.
 
 // We allow clippy::op_ref for some of the modules, because this warning fires
 // when calling `&a * &b` when `a` and `b` are copy types. The warning suggests
