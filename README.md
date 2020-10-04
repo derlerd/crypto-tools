@@ -4,7 +4,7 @@ The goal of this library is to provide efficient and easy to use implementations
 
 _WARNING: This code is currently work in progress and not intended for production use!_
 
-# Traits defining cryptographic primitives
+## Traits defining cryptographic primitives
 
 - Sigma protocols for statements over prime order `p` groups ([`SigmaProtocol`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/zkproofs/sigma_protocols/mod.rs#L71)). The challenge space of all Sigma protocols implementing this trait must be `ℤ_p` to be able to generically derive implementations of conjunctions and disjunctions of languages.
 - [Fiat-Shamir](https://doi.org/10.1007%2F3-540-68339-9_33) convertible Sigma protocols ([`FsConvertibleSigmaProtocol`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/zkproofs/sigma_protocols/fiat_shamir.rs#L22)). The interface is aligned with the compiler in [FMKV'12](https://eprint.iacr.org/2012/704.pdf) so that one can also implement variants of the FS transform providing stronger guarantees regarding non-malleability.
@@ -15,7 +15,7 @@ _WARNING: This code is currently work in progress and not intended for productio
 
 Note that we currently fix the [`Ristretto group`](https://ristretto.group/) as the used prime order group and use the implementation provided by the [curve25519-dalek library](https://github.com/dalek-cryptography/curve25519-dalek). In the future we plan to introduce an abstraction layer to allow use of this library with arbitrary prime-order groups. 
 
-# Implementations 
+## Implementations 
 
 - An implementation of the `digest::Digest` trait that enforces that every digest includes a domain separator in the hash.
 - Sigma protocols for proving knowledge of the following:
