@@ -7,7 +7,7 @@ _WARNING: This code is currently work in progress and not intended for productio
 # Traits defining cryptographic primitives
 
 - Sigma protocols for statements over prime order `p` groups ([`SigmaProtocol`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/zkproofs/sigma_protocols/mod.rs#L71)). The challenge space of all Sigma protocols implementing this trait must be `ℤ_p` to be able to generically derive implementations of conjunctions and disjunctions of languages.
-- Fiat-Shamir convertible Sigma protocols ([`FsConvertibleSigmaProtocol`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/zkproofs/sigma_protocols/fiat_shamir.rs#L22)).
+- [Fiat-Shamir](https://doi.org/10.1007%2F3-540-68339-9_33) convertible Sigma protocols ([`FsConvertibleSigmaProtocol`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/zkproofs/sigma_protocols/fiat_shamir.rs#L22)). The interface is aligned with the compiler in [FMKV'12](https://eprint.iacr.org/2012/704.pdf) so that one can also implement variants of the FS transform providing stronger guarantees regarding non-malleability.
 - Fiat-Shamir-type proof systems over prime order groups ([`FsProofSystem`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/zkproofs/mod.rs#L43)).
 - Encryption schemes ([`EncryptionScheme`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/encryption/mod.rs#L38)).
 - Common trait that allows to define how certain objects should be hashed ([`Hashable`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/hashing/mod.rs#L13)). 
@@ -22,7 +22,7 @@ Note that we currently fix the [`Ristretto group`](https://ristretto.group/) as 
   - A discrete logarithm `x` relative to two group elements `(g, h)` so that `h = g^x`.    
   - A discrete logarithm `x` relative to four group elements `(g, h, g', h')` so that `h = g^x ∧ h' = g'^x`.
 - A generic implementation of the OR composition of two Sigma protocols.
-- A generic implementation turning every Sigma protocol that implements the `FsConvertibleSigmaProtocol` trait into a `FsProofSystem`, i.e., generically applies the Fiat-Shamir transform.
+- A generic implementation turning every Sigma protocol that implements the `FsConvertibleSigmaProtocol` trait into a `FsProofSystem`, i.e., generically applies the [Fiat-Shamir](https://doi.org/10.1007%2F3-540-68339-9_33) transform and additionally includes the statement in the hash when obtaining the challenge for stronger non-malleability guarantees [FMKV'12](https://eprint.iacr.org/2012/704.pdf).
 - [ElGamal](https://doi.org/10.1007%2FBFb0054851) encryption 
 - Fully collision resistant chameleon hashes from [this paper](https://eprint.iacr.org/2020/403.pdf). 
 
