@@ -147,8 +147,7 @@ impl ChameleonHash for DssPkc20 {
 
         let x1 = pk.clone().into();
         let x2 =
-            ElGamal::prepare_well_formedness_proof(pk, hash.clone(), new_message.clone())
-                .into();
+            ElGamal::prepare_well_formedness_proof(pk, hash.clone(), new_message.clone()).into();
 
         let w1: DlogWitness = secret_key.clone().into();
 
