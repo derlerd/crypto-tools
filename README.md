@@ -6,12 +6,12 @@ _WARNING: This code is currently work in progress and not intended for productio
 
 ## Traits defining cryptographic primitives
 
-- Sigma protocols for statements over prime order `p` groups ([`SigmaProtocol`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/zkproofs/sigma_protocols/mod.rs#L71)). The challenge space of all Sigma protocols implementing this trait must be `ℤ_p` to be able to generically derive implementations of conjunctions and disjunctions of languages.
-- [Fiat-Shamir](https://doi.org/10.1007%2F3-540-68339-9_33) convertible Sigma protocols ([`FsConvertibleSigmaProtocol`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/zkproofs/sigma_protocols/fiat_shamir.rs#L22)). The interface is aligned with the compiler in [FMKV'12](https://eprint.iacr.org/2012/704.pdf) so that one can also implement variants of the FS transform providing stronger guarantees regarding non-malleability.
-- Fiat-Shamir-type proof systems over prime order groups ([`FsProofSystem`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/zkproofs/mod.rs#L43)).
-- Encryption schemes ([`EncryptionScheme`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/encryption/mod.rs#L38)).
-- Common trait that allows to define how certain objects should be hashed ([`Hashable`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/hashing/mod.rs#L13)). 
-- Chameleon hash functions ([`ChameleonHash`](https://github.com/derlerd/modern-crypto-tools/blob/d39e66453d3c7746d4898638823e30a5af24f13a/src/chameleon_hashing/mod.rs#L37)).
+- Sigma protocols for statements over prime order `p` groups (`SigmaProtocol`). The challenge space of all Sigma protocols implementing this trait must be `ℤ_p` to be able to generically derive implementations of conjunctions and disjunctions of languages.
+- [Fiat-Shamir](https://doi.org/10.1007%2F3-540-68339-9_33) convertible Sigma protocols (`FsConvertibleSigmaProtocol`). The interface is aligned with the compiler in [FMKV'12](https://eprint.iacr.org/2012/704.pdf) so that one can also implement variants of the FS transform providing stronger guarantees regarding non-malleability.
+- Fiat-Shamir-type proof systems over prime order groups (`FsProofSystem`).
+- Encryption schemes (`EncryptionScheme`).
+- Common trait that allows to define how certain objects should be hashed (`Hashable`). 
+- Chameleon hash functions (`ChameleonHash`).
 
 Note that we currently fix the [Ristretto group](https://ristretto.group/) as the used prime order group and use the implementation provided by the [curve25519-dalek library](https://github.com/dalek-cryptography/curve25519-dalek). In the future we plan to introduce an abstraction layer to allow use of this library with arbitrary prime-order groups. 
 
