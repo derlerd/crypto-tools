@@ -20,6 +20,7 @@ where
     p2: PhantomData<P2>,
 }
 
+#[derive(Clone)]
 pub enum OrComposedWitness<P1, P2>
 where
     P1: SigmaProtocol,
@@ -30,22 +31,6 @@ where
     WitnessP1(P1::W),
     WitnessP2(P2::W),
     Both((P1::W, P2::W)),
-}
-
-impl<P1, P2> Clone for OrComposedWitness<P1, P2>
-where
-    P1: SigmaProtocol,
-    P2: SigmaProtocol,
-    <P1 as SigmaProtocol>::W: Clone,
-    <P2 as SigmaProtocol>::W: Clone,
-{
-    fn clone(&self) -> Self {
-        match self {
-            OrComposedWitness::WitnessP1(w1) => OrComposedWitness::WitnessP1(w1.clone()),
-            OrComposedWitness::WitnessP2(w2) => OrComposedWitness::WitnessP2(w2.clone()),
-            OrComposedWitness::Both((w1, w2)) => OrComposedWitness::Both((w1.clone(), w2.clone())),
-        }
-    }
 }
 
 pub enum OrProverState<P1, P2>
