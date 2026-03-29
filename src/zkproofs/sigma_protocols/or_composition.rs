@@ -33,6 +33,7 @@ where
     Both((P1::W, P2::W)),
 }
 
+#[derive(Clone)]
 pub enum OrProverState<P1, P2>
 where
     P1: SigmaProtocol,
@@ -44,27 +45,6 @@ where
 {
     SimulatedP1(P1::STS, P2::ST),
     SimulatedP2(P1::ST, P2::STS),
-}
-
-impl<P1, P2> Clone for OrProverState<P1, P2>
-where
-    P1: SigmaProtocol,
-    P2: SigmaProtocol,
-    <P1 as SigmaProtocol>::ST: Clone,
-    <P2 as SigmaProtocol>::ST: Clone,
-    <P1 as SigmaProtocol>::STS: Clone,
-    <P2 as SigmaProtocol>::STS: Clone,
-{
-    fn clone(&self) -> Self {
-        match self {
-            OrProverState::SimulatedP1(sts1, st2) => {
-                OrProverState::SimulatedP1(sts1.clone(), st2.clone())
-            }
-            OrProverState::SimulatedP2(st1, sts2) => {
-                OrProverState::SimulatedP2(st1.clone(), sts2.clone())
-            }
-        }
-    }
 }
 
 pub struct OrComposedStatement<P1, P2>

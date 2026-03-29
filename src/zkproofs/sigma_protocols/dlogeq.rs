@@ -12,6 +12,7 @@ use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::{Challenge, Error, SigmaProtocol, SimulatorState};
 
+#[derive(Clone)]
 pub struct DlogEq;
 
 #[derive(Clone)]
