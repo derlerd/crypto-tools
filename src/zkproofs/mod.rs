@@ -4,12 +4,12 @@ pub mod sigma_protocols;
 use rand_core::{CryptoRng, RngCore};
 
 use crate::hashing::Hash;
-use crate::zkproofs::sigma_protocols::Error as SigmaProtocolError;
-use crate::zkproofs::sigma_protocols::SigmaProtocol;
 use crate::zkproofs::sigma_protocols::dlog::Dlog;
 use crate::zkproofs::sigma_protocols::dlogeq::DlogEq;
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::or_composition::OrComposedSigmaProtocol;
+use crate::zkproofs::sigma_protocols::Error as SigmaProtocolError;
+use crate::zkproofs::sigma_protocols::SigmaProtocol;
 
 use crate::hashing::Hashable;
 

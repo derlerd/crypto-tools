@@ -1,11 +1,11 @@
 use rand::thread_rng;
 use sha2::Sha512;
 
-use crate::zkproofs::Error as ZkProofError;
 use crate::zkproofs::sigma_protocols::dlog::Dlog;
 use crate::zkproofs::sigma_protocols::dlogeq::DlogEq;
 use crate::zkproofs::sigma_protocols::or_composition::{OrComposedStatement, OrComposedWitness};
 use crate::zkproofs::sigma_protocols::{Error, SigmaProtocol};
+use crate::zkproofs::Error as ZkProofError;
 use crate::zkproofs::{DlOrDlEq, FsProofSystem};
 
 fn get_valid_statement_witness_combinations_for_test() -> Vec<(

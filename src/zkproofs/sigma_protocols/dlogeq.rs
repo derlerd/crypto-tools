@@ -104,10 +104,10 @@ where
     H: Hash,
 {
     fn hash(&self, state: &mut H) {
-        state.input(self.g_1.compress().as_bytes());
-        state.input(self.h_1.compress().as_bytes());
-        state.input(self.g_2.compress().as_bytes());
-        state.input(self.h_2.compress().as_bytes());
+        state.update(self.g_1.compress().as_bytes());
+        state.update(self.h_1.compress().as_bytes());
+        state.update(self.g_2.compress().as_bytes());
+        state.update(self.h_2.compress().as_bytes());
     }
 }
 
@@ -116,8 +116,8 @@ where
     H: Hash,
 {
     fn hash(&self, state: &mut H) {
-        state.input(self.c1.compress().as_bytes());
-        state.input(self.c2.compress().as_bytes());
+        state.update(self.c1.compress().as_bytes());
+        state.update(self.c2.compress().as_bytes());
     }
 }
 

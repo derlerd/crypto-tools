@@ -26,7 +26,7 @@ pub trait Hash: Digest {
 impl<D: Digest> Hash for D {
     fn new_with_separator(domain_separator: DomainSeparator) -> Self {
         let mut hash = D::new();
-        hash.input(domain_separator);
+        hash.update(domain_separator);
         hash
     }
 }

@@ -6,10 +6,10 @@ use rand::thread_rng;
 use sha2::Sha512;
 
 use crate::hashing::Hashable;
-use crate::zkproofs::Error as ProofSystemError;
-use crate::zkproofs::FsProofSystem;
 use crate::zkproofs::sigma_protocols::dlog::{Dlog, DlogStatement, DlogWitness};
 use crate::zkproofs::sigma_protocols::{Error, SigmaProtocol};
+use crate::zkproofs::Error as ProofSystemError;
+use crate::zkproofs::FsProofSystem;
 
 pub(crate) fn create_dlog_statement_for_testing() -> (DlogStatement, DlogWitness) {
     let w = Scalar::random(&mut thread_rng());
@@ -22,7 +22,7 @@ pub(crate) fn create_dlog_statement_for_testing() -> (DlogStatement, DlogWitness
 fn hash_statement_for_testing(x: DlogStatement) -> Vec<u8> {
     let mut digest = Sha512::new();
     x.hash(&mut digest);
-    digest.result().to_vec()
+    digest.finalize().to_vec()
 }
 
 #[test]

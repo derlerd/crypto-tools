@@ -3,8 +3,8 @@ use curve25519_dalek::scalar::Scalar;
 use rand::thread_rng;
 use sha2::Sha512;
 
-use crate::encryption::EncryptionScheme;
 use crate::encryption::elgamal::{ElGamal, ElGamalMessage};
+use crate::encryption::EncryptionScheme;
 
 #[test]
 fn key_gen_success() {
