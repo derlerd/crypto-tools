@@ -1,22 +1,24 @@
-[package]
-name = "modern-crypto-tools"
+[workspace] 
+
+members = [
+    "rs/chameleon_hashing",
+    "rs/encryption",
+    "rs/examples",
+    "rs/hashing",
+    "rs/zkproofs",
+]
+
+resolver = "3"
+
+[workspace.package]
 version = "0.1.0"
 authors = ["David Derler <david@derler.info>"]
-edition = "2018"
+edition = "2024"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
+[workspace.dependencies]
 curve25519-dalek = { version = "4.1.3", features = [ "rand_core", "digest" ] }
 rand = "0.8"
 rand_core = "0.6.4"
 sha2 = "0.10.9"
 digest = "0.10.7"
 hybrid-array = "0.4.8"
-
-[dev-dependencies]
-criterion = "0.8.2"
-
-[[bench]]
-name = "benchmarks"
-harness = false

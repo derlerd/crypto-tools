@@ -1,10 +1,8 @@
 use rand::thread_rng;
 use sha2::Sha512;
 
-use modern_crypto_tools::{
-    chameleon_hashing::ChameleonHash, chameleon_hashing::dss_pkc_20::DssPkc20,
-    encryption::elgamal::ElGamalMessage,
-};
+use chameleon_hashing::{ChameleonHash, dss_pkc_20::DssPkc20};
+use encryption::elgamal::ElGamalMessage;
 
 fn main() {
     let (sk, pk) = DssPkc20::key_gen(32, &mut thread_rng()).unwrap();

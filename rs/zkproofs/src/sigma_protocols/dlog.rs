@@ -7,9 +7,9 @@ use hybrid_array::sizes::U64;
 
 use std::convert::From;
 
-use crate::hashing::{DomainSeparator, Hash, Hashable};
-use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
-use crate::zkproofs::sigma_protocols::{Challenge, Error, SigmaProtocol, SimulatorState};
+use crate::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
+use crate::sigma_protocols::{Challenge, Error, SigmaProtocol, SimulatorState};
+use hashing::{DomainSeparator, Hash, Hashable};
 
 #[derive(Clone)]
 pub struct Dlog;

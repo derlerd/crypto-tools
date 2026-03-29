@@ -1,7 +1,7 @@
 use digest::Digest;
 use sha2::Sha256;
 
-use crate::hashing::{DomainSeparator, Hash};
+use crate::{DomainSeparator, Hash};
 
 fn initialize_hash_tuple<H: Hash + Digest>() -> (impl Digest, impl Hash) {
     let mut h1 = H::new();

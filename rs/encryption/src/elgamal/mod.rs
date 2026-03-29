@@ -12,8 +12,8 @@ use rand_core::{CryptoRng, RngCore};
 use std::cmp::PartialEq;
 use std::convert::From;
 
-use crate::encryption::{Error, PublicKey, SecretKey};
-use crate::zkproofs::sigma_protocols::dlog::{DlogStatement, DlogWitness};
+use crate::{Error, PublicKey, SecretKey};
+use zkproofs::sigma_protocols::dlog::{DlogStatement, DlogWitness};
 
 pub struct ElGamal;
 
@@ -107,7 +107,7 @@ impl super::EncryptionScheme for ElGamal {
 }
 
 impl ElGamal {
-    pub(crate) fn encrypt_reveal_randomness<RNG: RngCore + CryptoRng>(
+    pub fn encrypt_reveal_randomness<RNG: RngCore + CryptoRng>(
         public_key: &ElGamalPublicKey,
         message: &ElGamalMessage,
         rng: &mut RNG,
@@ -119,7 +119,7 @@ impl ElGamal {
         (ElGamalCiphertext(c1, c2), r)
     }
 
-    pub(crate) fn prepare_well_formedness_proof(
+    pub fn prepare_well_formedness_proof(
         public_key: ElGamalPublicKey,
         ciphertext: ElGamalCiphertext,
         message: ElGamalMessage,

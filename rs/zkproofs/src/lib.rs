@@ -3,15 +3,13 @@ pub mod sigma_protocols;
 
 use rand_core::{CryptoRng, RngCore};
 
-use crate::hashing::Hash;
-use crate::zkproofs::sigma_protocols::dlog::Dlog;
-use crate::zkproofs::sigma_protocols::dlogeq::DlogEq;
-use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
-use crate::zkproofs::sigma_protocols::or_composition::OrComposedSigmaProtocol;
-use crate::zkproofs::sigma_protocols::Error as SigmaProtocolError;
-use crate::zkproofs::sigma_protocols::SigmaProtocol;
-
-use crate::hashing::Hashable;
+use crate::sigma_protocols::Error as SigmaProtocolError;
+use crate::sigma_protocols::SigmaProtocol;
+use crate::sigma_protocols::dlog::Dlog;
+use crate::sigma_protocols::dlogeq::DlogEq;
+use crate::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
+use crate::sigma_protocols::or_composition::OrComposedSigmaProtocol;
+use hashing::{Hash, Hashable};
 
 use hybrid_array::sizes::U64;
 
@@ -127,4 +125,4 @@ impl std::fmt::Display for Error {
     }
 }
 
-pub(crate) type DlOrDlEq = OrComposedSigmaProtocol<Dlog, DlogEq>;
+pub type DlOrDlEq = OrComposedSigmaProtocol<Dlog, DlogEq>;

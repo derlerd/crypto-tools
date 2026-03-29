@@ -3,16 +3,16 @@ mod tests;
 
 use rand_core::{CryptoRng, RngCore};
 
-use crate::chameleon_hashing::{ChameleonHash, Error};
-use crate::encryption::elgamal::{
+use crate::{ChameleonHash, Error};
+use encryption::EncryptionScheme;
+use encryption::Error as EncryptionError;
+use encryption::elgamal::{
     ElGamal, ElGamalCiphertext, ElGamalMessage, ElGamalPublicKey, ElGamalSecretKey,
 };
-use crate::encryption::EncryptionScheme;
-use crate::encryption::Error as EncryptionError;
-use crate::zkproofs::sigma_protocols::dlog::DlogWitness;
-use crate::zkproofs::sigma_protocols::Error as SigmaProtocolError;
-use crate::zkproofs::Error as ProofSystemError;
-use crate::zkproofs::{DlOrDlEq, FsProofSystem};
+use zkproofs::Error as ProofSystemError;
+use zkproofs::sigma_protocols::Error as SigmaProtocolError;
+use zkproofs::sigma_protocols::dlog::DlogWitness;
+use zkproofs::{DlOrDlEq, FsProofSystem};
 
 use sha2::Sha512;
 

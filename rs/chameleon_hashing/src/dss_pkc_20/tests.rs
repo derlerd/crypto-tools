@@ -1,9 +1,9 @@
 use rand::thread_rng;
 use sha2::Sha512;
 
-use crate::chameleon_hashing::dss_pkc_20::{DssPkc20, DssPkc20Error};
-use crate::chameleon_hashing::{ChameleonHash, Error};
-use crate::encryption::elgamal::ElGamalMessage;
+use crate::dss_pkc_20::{DssPkc20, DssPkc20Error};
+use crate::{ChameleonHash, Error};
+use encryption::elgamal::ElGamalMessage;
 
 #[test]
 fn key_gen_success() {

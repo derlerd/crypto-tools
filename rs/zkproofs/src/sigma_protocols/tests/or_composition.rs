@@ -1,18 +1,18 @@
 use rand::thread_rng;
 use sha2::Sha512;
 
-use crate::zkproofs::sigma_protocols::dlog::Dlog;
-use crate::zkproofs::sigma_protocols::dlogeq::DlogEq;
-use crate::zkproofs::sigma_protocols::or_composition::{OrComposedStatement, OrComposedWitness};
-use crate::zkproofs::sigma_protocols::{Error, SigmaProtocol};
-use crate::zkproofs::Error as ZkProofError;
-use crate::zkproofs::{DlOrDlEq, FsProofSystem};
+use crate::Error as ZkProofError;
+use crate::sigma_protocols::dlog::Dlog;
+use crate::sigma_protocols::dlogeq::DlogEq;
+use crate::sigma_protocols::or_composition::{OrComposedStatement, OrComposedWitness};
+use crate::sigma_protocols::{Error, SigmaProtocol};
+use crate::{DlOrDlEq, FsProofSystem};
 
 fn get_valid_statement_witness_combinations_for_test() -> Vec<(
     OrComposedStatement<Dlog, DlogEq>,
     OrComposedWitness<Dlog, DlogEq>,
 )> {
-    use crate::zkproofs::sigma_protocols::tests::*;
+    use crate::sigma_protocols::tests::*;
     let (x1, w1) = dlog::create_dlog_statement_for_testing();
     let (x2, w2) = dlogeq::create_dlogeq_statement_for_testing();
 
@@ -29,7 +29,7 @@ fn get_valid_statement_witness_combinations_for_test() -> Vec<(
 }
 
 fn get_random_witness_combinations_for_test() -> Vec<OrComposedWitness<Dlog, DlogEq>> {
-    use crate::zkproofs::sigma_protocols::tests::*;
+    use crate::sigma_protocols::tests::*;
     let (_, w1) = dlog::create_dlog_statement_for_testing();
     let (_, w2) = dlogeq::create_dlogeq_statement_for_testing();
 

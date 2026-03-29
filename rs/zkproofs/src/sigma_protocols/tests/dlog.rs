@@ -5,11 +5,11 @@ use digest::Digest;
 use rand::thread_rng;
 use sha2::Sha512;
 
-use crate::hashing::Hashable;
-use crate::zkproofs::sigma_protocols::dlog::{Dlog, DlogStatement, DlogWitness};
-use crate::zkproofs::sigma_protocols::{Error, SigmaProtocol};
-use crate::zkproofs::Error as ProofSystemError;
-use crate::zkproofs::FsProofSystem;
+use crate::Error as ProofSystemError;
+use crate::FsProofSystem;
+use crate::sigma_protocols::dlog::{Dlog, DlogStatement, DlogWitness};
+use crate::sigma_protocols::{Error, SigmaProtocol};
+use hashing::Hashable;
 
 pub(crate) fn create_dlog_statement_for_testing() -> (DlogStatement, DlogWitness) {
     let w = Scalar::random(&mut thread_rng());

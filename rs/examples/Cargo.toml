@@ -1,0 +1,15 @@
+[package]
+name = "examples"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+
+[dependencies]
+chameleon-hashing = { path = "../chameleon_hashing/" }
+encryption = { path = "../encryption/" }
+rand = { workspace = true }
+sha2 = { workspace = true } 
+
+[[bin]]
+name = "ch_pkc20_example"
+path = "src/ch_pkc20_example.rs"

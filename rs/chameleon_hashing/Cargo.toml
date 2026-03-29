@@ -1,0 +1,19 @@
+[package]
+name = "chameleon-hashing"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+
+[dependencies]
+encryption = { path = "../encryption" }
+zkproofs = { path = "../zkproofs" }
+curve25519-dalek = { workspace = true }
+rand = { workspace = true }
+rand_core = { workspace = true }
+sha2 = { workspace = true } 
+digest = { workspace = true }
+hybrid-array = { workspace = true }
+
+[lib]
+name = "chameleon_hashing"
+path = "src/lib.rs"

@@ -1,7 +1,5 @@
-use crate::{
-    hashing::Hash,
-    zkproofs::sigma_protocols::{Challenge, SigmaProtocol},
-};
+use crate::sigma_protocols::{Challenge, SigmaProtocol};
+use hashing::Hash;
 
 use hybrid_array::sizes::U64;
 

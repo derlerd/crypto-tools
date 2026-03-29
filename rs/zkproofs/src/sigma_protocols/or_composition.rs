@@ -6,9 +6,9 @@ use rand_core::{CryptoRng, RngCore};
 
 use hybrid_array::sizes::U64;
 
-use crate::hashing::{DomainSeparator, Hash, Hashable};
-use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
-use crate::zkproofs::sigma_protocols::{Challenge, Error, SigmaProtocol, SimulatorState};
+use crate::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
+use crate::sigma_protocols::{Challenge, Error, SigmaProtocol, SimulatorState};
+use hashing::{DomainSeparator, Hash, Hashable};
 
 pub struct OrComposedSigmaProtocol<P1, P2>
 where
