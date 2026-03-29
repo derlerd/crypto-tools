@@ -4,10 +4,10 @@ mod tests;
 use curve25519_dalek::ristretto::RistrettoPoint;
 use curve25519_dalek::scalar::Scalar;
 
-use digest::generic_array::typenum::U64;
 use digest::Digest;
+use hybrid_array::sizes::U64;
 
-use rand::{CryptoRng, RngCore};
+use rand_core::{CryptoRng, RngCore};
 
 use std::cmp::PartialEq;
 use std::convert::From;

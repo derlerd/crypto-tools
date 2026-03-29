@@ -2,12 +2,11 @@ use curve25519_dalek::scalar::Scalar;
 
 use std::marker::PhantomData;
 
-use rand::{CryptoRng, RngCore};
+use rand_core::{CryptoRng, RngCore};
 
-use digest::generic_array::typenum::U64;
-use digest::Digest;
+use hybrid_array::sizes::U64;
 
-use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
+use crate::hashing::{DomainSeparator, Hash, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::{Challenge, Error, SigmaProtocol, SimulatorState};
 
@@ -47,6 +46,7 @@ where
     SimulatedP2(P1::ST, P2::STS),
 }
 
+#[derive(Clone)]
 pub struct OrComposedStatement<P1, P2>
 where
     P1: SigmaProtocol,
@@ -58,48 +58,33 @@ where
     s2: P2::S,
 }
 
-impl<P1, P2> Clone for OrComposedStatement<P1, P2>
-where
-    P1: SigmaProtocol,
-    P2: SigmaProtocol,
-    <P1 as SigmaProtocol>::S: Clone,
-    <P2 as SigmaProtocol>::S: Clone,
-{
-    fn clone(&self) -> Self {
-        OrComposedStatement {
-            s1: self.s1.clone(),
-            s2: self.s2.clone(),
-        }
-    }
-}
-
 pub struct OrComposedCommitment<P1: SigmaProtocol, P2: SigmaProtocol>(P1::COM, P2::COM);
 
 pub struct OrComposedResponse<P1: SigmaProtocol, P2: SigmaProtocol>(Challenge, P1::RSP, P2::RSP);
 
-impl<P1, P2, DIG> Hashable<DIG> for OrComposedStatement<P1, P2>
+impl<P1, P2, H> Hashable<H> for OrComposedStatement<P1, P2>
 where
     P1: SigmaProtocol,
     P2: SigmaProtocol,
-    <P1 as SigmaProtocol>::S: Hashable<DIG> + Clone,
-    <P2 as SigmaProtocol>::S: Hashable<DIG> + Clone,
-    DIG: Digest,
+    <P1 as SigmaProtocol>::S: Hashable<H> + Clone,
+    <P2 as SigmaProtocol>::S: Hashable<H> + Clone,
+    H: Hash,
 {
-    fn hash(&self, state: &mut DIG) {
+    fn hash(&self, state: &mut H) {
         self.s1.hash(state);
         self.s2.hash(state);
     }
 }
 
-impl<P1, P2, DIG> Hashable<DIG> for OrComposedCommitment<P1, P2>
+impl<P1, P2, H> Hashable<H> for OrComposedCommitment<P1, P2>
 where
     P1: SigmaProtocol,
     P2: SigmaProtocol,
-    <P1 as SigmaProtocol>::COM: Hashable<DIG>,
-    <P2 as SigmaProtocol>::COM: Hashable<DIG>,
-    DIG: Digest,
+    <P1 as SigmaProtocol>::COM: Hashable<H>,
+    <P2 as SigmaProtocol>::COM: Hashable<H>,
+    H: Hash,
 {
-    fn hash(&self, state: &mut DIG) {
+    fn hash(&self, state: &mut H) {
         self.0.hash(state);
         self.1.hash(state);
     }
@@ -292,15 +277,15 @@ where
 ///
 /// Intuitively, one can say that if two Sigma protocols are individually FS
 /// convertible then so is their OR composition.
-impl<P1, P2, DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG>
-    for OrComposedSigmaProtocol<P1, P2>
+impl<P1, P2, H> FsConvertibleSigmaProtocol<Self, H> for OrComposedSigmaProtocol<P1, P2>
 where
-    P1: SigmaProtocol + FsConvertibleSigmaProtocol<P1, DIG>,
-    P2: SigmaProtocol + FsConvertibleSigmaProtocol<P2, DIG>,
-    <P1 as SigmaProtocol>::S: Hashable<DomainSeparatedHash<DIG>> + Clone,
-    <P2 as SigmaProtocol>::S: Hashable<DomainSeparatedHash<DIG>> + Clone,
-    <P1 as SigmaProtocol>::COM: Hashable<DomainSeparatedHash<DIG>>,
-    <P2 as SigmaProtocol>::COM: Hashable<DomainSeparatedHash<DIG>>,
+    H: Hash<OutputSize = U64>,
+    P1: SigmaProtocol + FsConvertibleSigmaProtocol<P1, H>,
+    P2: SigmaProtocol + FsConvertibleSigmaProtocol<P2, H>,
+    <P1 as SigmaProtocol>::S: Hashable<H> + Clone,
+    <P2 as SigmaProtocol>::S: Hashable<H> + Clone,
+    <P1 as SigmaProtocol>::COM: Hashable<H>,
+    <P2 as SigmaProtocol>::COM: Hashable<H>,
     <P1 as SigmaProtocol>::W: Clone,
     <P2 as SigmaProtocol>::W: Clone,
     <P1 as SigmaProtocol>::ST: Clone,
@@ -323,8 +308,7 @@ where
         commitment: &OrComposedCommitment<P1, P2>,
     ) -> Challenge {
         let dom_sep = DomainSeparator::from_string(Self::domain_separator());
-        let mut h = DomainSeparatedHash::<DIG>::new();
-        h.init(dom_sep);
+        let mut h = H::new_with_separator(dom_sep);
         statement.hash(&mut h);
         commitment.hash(&mut h);
         Challenge(Scalar::from_hash(h))

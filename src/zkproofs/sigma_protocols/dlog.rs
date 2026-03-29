@@ -1,14 +1,13 @@
 use curve25519_dalek::ristretto::RistrettoPoint;
 use curve25519_dalek::scalar::Scalar;
 
-use rand::{CryptoRng, RngCore};
+use rand_core::{CryptoRng, RngCore};
 
-use digest::generic_array::typenum::U64;
-use digest::Digest;
+use hybrid_array::sizes::U64;
 
 use std::convert::From;
 
-use crate::hashing::{DomainSeparatedHash, DomainSeparator, Hashable};
+use crate::hashing::{DomainSeparator, Hash, Hashable};
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::{Challenge, Error, SigmaProtocol, SimulatorState};
 
@@ -76,21 +75,21 @@ impl DlogStatement {
     }
 }
 
-impl<DIG> Hashable<DIG> for DlogStatement
+impl<H> Hashable<H> for DlogStatement
 where
-    DIG: Digest,
+    H: Hash,
 {
-    fn hash(&self, state: &mut DIG) {
+    fn hash(&self, state: &mut H) {
         state.input(self.g_1.compress().as_bytes());
         state.input(self.h_1.compress().as_bytes());
     }
 }
 
-impl<DIG> Hashable<DIG> for DlogCommitment
+impl<H> Hashable<H> for DlogCommitment
 where
-    DIG: Digest,
+    H: Hash,
 {
-    fn hash(&self, state: &mut DIG) {
+    fn hash(&self, state: &mut H) {
         state.input(self.c1.compress().as_bytes());
     }
 }
@@ -180,7 +179,7 @@ impl SigmaProtocol for Dlog {
 /// Implementation of the FS conversion related functionality for a Sigma protocol
 /// for the language `S = { (g_1, g_2) | ∃ x : g_1^x = g_2 }`, where `g_1` and `g_2`
 /// are elements of the underlying group.
-impl<DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG> for Dlog {
+impl<H: Hash<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, H> for Dlog {
     type FSP = DlogProof;
 
     fn domain_separator() -> String {
@@ -188,12 +187,10 @@ impl<DIG: Digest<OutputSize = U64>> FsConvertibleSigmaProtocol<Self, DIG> for Dl
     }
 
     fn hash_challenge(statement: &DlogStatement, commitment: &DlogCommitment) -> Challenge {
-        let dom_sep = DomainSeparator::from_string(<Self as FsConvertibleSigmaProtocol<
-            Self,
-            DIG,
-        >>::domain_separator());
-        let mut h = DomainSeparatedHash::<DIG>::new();
-        h.init(dom_sep);
+        let dom_sep = DomainSeparator::from_string(
+            <Self as FsConvertibleSigmaProtocol<Self, H>>::domain_separator(),
+        );
+        let mut h = H::new_with_separator(dom_sep);
         statement.hash(&mut h);
         commitment.hash(&mut h);
         Challenge(Scalar::from_hash(h))

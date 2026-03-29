@@ -1,7 +1,7 @@
 /// The [ElGamal](https://doi.org/10.1007%2FBFb0054851) encryption scheme
 pub mod elgamal;
 
-use rand::{CryptoRng, RngCore};
+use rand_core::{CryptoRng, RngCore};
 
 /// Encryption error type.
 #[derive(Debug)]

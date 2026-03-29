@@ -1,19 +1,19 @@
 /// Sigma protocols, transformations, compositions, ...
 pub mod sigma_protocols;
 
-use rand::{CryptoRng, RngCore};
+use rand_core::{CryptoRng, RngCore};
 
+use crate::hashing::Hash;
+use crate::zkproofs::sigma_protocols::Error as SigmaProtocolError;
+use crate::zkproofs::sigma_protocols::SigmaProtocol;
 use crate::zkproofs::sigma_protocols::dlog::Dlog;
 use crate::zkproofs::sigma_protocols::dlogeq::DlogEq;
 use crate::zkproofs::sigma_protocols::fiat_shamir::FsConvertibleSigmaProtocol;
 use crate::zkproofs::sigma_protocols::or_composition::OrComposedSigmaProtocol;
-use crate::zkproofs::sigma_protocols::Error as SigmaProtocolError;
-use crate::zkproofs::sigma_protocols::SigmaProtocol;
 
 use crate::hashing::Hashable;
 
-use digest::generic_array::typenum::U64;
-use digest::Digest;
+use hybrid_array::sizes::U64;
 
 #[derive(Debug)]
 pub enum Error {
@@ -40,7 +40,7 @@ impl From<SigmaProtocolError> for Error {
 /// A proof system for a language `S` can be used to compute proofs that attest
 /// that a certain statement is in `S` and to verify those proofs. The concrete
 /// language a proof system works for is defined by the implementation.
-pub trait FsProofSystem<DIG: Digest<OutputSize = U64>> {
+pub trait FsProofSystem<H: Hash<OutputSize = U64>> {
     /// The space the statements to be proven live in
     type S;
     /// The space the witnesses live in
@@ -72,12 +72,12 @@ pub trait FsProofSystem<DIG: Digest<OutputSize = U64>> {
 /// Note that having this generic implementation means that all `SigmaProtocols`
 /// adhering to the aforementioned trait bounds can automatically be used as
 /// `FsProofSystems` without any additional code.
-impl<SP, DIG> FsProofSystem<DIG> for SP
+impl<SP, H> FsProofSystem<H> for SP
 where
-    DIG: Digest<OutputSize = U64>,
-    SP: SigmaProtocol + FsConvertibleSigmaProtocol<SP, DIG>,
-    <Self as SigmaProtocol>::S: Hashable<DIG>,
-    <Self as SigmaProtocol>::COM: Hashable<DIG>,
+    H: Hash<OutputSize = U64>,
+    SP: SigmaProtocol + FsConvertibleSigmaProtocol<SP, H>,
+    <Self as SigmaProtocol>::S: Hashable<H>,
+    <Self as SigmaProtocol>::COM: Hashable<H>,
 {
     /// The statement type is the same as the statement type of the underlying
     /// sigma protocol.

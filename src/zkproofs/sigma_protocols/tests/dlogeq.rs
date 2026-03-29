@@ -6,10 +6,10 @@ use rand::thread_rng;
 use sha2::Sha512;
 
 use crate::hashing::Hashable;
-use crate::zkproofs::sigma_protocols::dlogeq::{DlogEq, DlogEqStatement, DlogEqWitness};
-use crate::zkproofs::sigma_protocols::{Error, SigmaProtocol};
 use crate::zkproofs::Error as ProofSystemError;
 use crate::zkproofs::FsProofSystem;
+use crate::zkproofs::sigma_protocols::dlogeq::{DlogEq, DlogEqStatement, DlogEqWitness};
+use crate::zkproofs::sigma_protocols::{Error, SigmaProtocol};
 
 pub(crate) fn create_dlogeq_statement_for_testing() -> (DlogEqStatement, DlogEqWitness) {
     let w = Scalar::random(&mut thread_rng());
@@ -31,7 +31,7 @@ fn hash_statement_for_testing(x: DlogEqStatement) -> Vec<u8> {
 fn test_valid_statement() {
     let (x, w) = create_dlogeq_statement_for_testing();
 
-    assert_eq!(x.verify(&w), true);
+    assert!(x.verify(&w));
 }
 
 #[test]
@@ -40,7 +40,7 @@ fn test_invalid_statement() {
 
     let w = Scalar::random(&mut thread_rng());
 
-    assert_eq!(x.verify(&w.into()), false);
+    assert!(!x.verify(&w.into()));
 }
 
 #[test]

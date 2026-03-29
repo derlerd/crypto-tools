@@ -2,7 +2,7 @@ use rand::thread_rng;
 use sha2::Sha512;
 
 use modern_crypto_tools::{
-    chameleon_hashing::dss_pkc_20::DssPkc20, chameleon_hashing::ChameleonHash,
+    chameleon_hashing::ChameleonHash, chameleon_hashing::dss_pkc_20::DssPkc20,
     encryption::elgamal::ElGamalMessage,
 };
 

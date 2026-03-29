@@ -21,7 +21,7 @@ use curve25519_dalek::scalar::Scalar;
 
 use std::ops::{Add, Sub};
 
-use rand::{CryptoRng, RngCore};
+use rand_core::{CryptoRng, RngCore};
 
 #[derive(Debug)]
 pub enum Error {

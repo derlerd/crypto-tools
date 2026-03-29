@@ -2,7 +2,7 @@
 /// [DSS'20](https://eprint.iacr.org/2020/403.pdf).
 pub mod dss_pkc_20;
 
-use rand::{CryptoRng, RngCore};
+use rand_core::{CryptoRng, RngCore};
 
 /// Chameleon hashing error type.
 #[derive(Debug)]

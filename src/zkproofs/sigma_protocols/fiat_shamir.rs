@@ -1,7 +1,9 @@
-use crate::zkproofs::sigma_protocols::{Challenge, SigmaProtocol};
+use crate::{
+    hashing::Hash,
+    zkproofs::sigma_protocols::{Challenge, SigmaProtocol},
+};
 
-use digest::generic_array::typenum::U64;
-use digest::Digest;
+use hybrid_array::sizes::U64;
 
 /// Represents a [Fiat-Shamir](https://doi.org/10.1007%2F3-540-68339-9_33)
 /// convertible Sigma protocol. The interface is aligned with the compiler
@@ -19,9 +21,9 @@ use digest::Digest;
 /// interactive version--the prover can not predict the challenge before
 /// committing itself to the first message. One can argue about its security
 /// in the random oracle model.
-pub trait FsConvertibleSigmaProtocol<SP, DIG>
+pub trait FsConvertibleSigmaProtocol<SP, H>
 where
-    DIG: Digest<OutputSize = U64>,
+    H: Hash<OutputSize = U64>,
     SP: SigmaProtocol,
 {
     /// The space where the corresponding proofs live in.
