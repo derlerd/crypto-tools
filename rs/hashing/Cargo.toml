@@ -5,12 +5,8 @@ authors.workspace = true
 edition.workspace = true
 
 [dependencies]
-curve25519-dalek = { version = "4.1.3", features = [ "rand_core", "digest" ] }
-rand = "0.8"
-rand_core = "0.6.4"
-sha2 = "0.10.9"
-digest = "0.10.7"
-hybrid-array = "0.4.8"
+sha2 = { workspace = true }
+digest = { workspace = true } 
 
 [lib]
 name = "hashing"
