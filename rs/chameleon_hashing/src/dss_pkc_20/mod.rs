@@ -61,9 +61,9 @@ impl std::fmt::Display for DssPkc20Error {
 /// of two primitives implemented within this crate:
 ///
 /// - The [ElGamal](https://doi.org/10.1007%2FBFb0054851) encryption scheme
-/// [here](../encryption/elgamal/struct.ElGamal.html). The key pair of this
-/// scheme will be an ElGamal key pair, and the hash will be an ElGamal
-/// ciphertext.
+///   [here](../encryption/elgamal/struct.ElGamal.html). The key pair of this
+///   scheme will be an ElGamal key pair, and the hash will be an ElGamal
+///   ciphertext.
 ///
 /// - A proof system obtained by [OR-composing](https://doi.org/10.1007/3-540-48658-5_19)
 ///   (1) a sigma protocol to prove knowledge of the discrete logarithm of

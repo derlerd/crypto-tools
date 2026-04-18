@@ -37,7 +37,7 @@ impl DomainSeparator {
     /// of the given string with its length prepended to avoid
     /// collisions between domain separators.
     pub fn from_string(s: String) -> Self {
-        let dom_sep = format!("{}{}", s.len().to_string(), s);
+        let dom_sep = format!("{}{}", s.len(), s);
         DomainSeparator {
             bytes: dom_sep.into_bytes(),
         }

@@ -22,7 +22,7 @@ fn test_encode_message() {
     let message = "Test Message".to_string();
 
     let m_zl = Scalar::hash_from_bytes::<Sha512>(message.as_bytes());
-    let m_group = &m_zl * &curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT;
+    let m_group = m_zl * curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT;
 
     let m = ElGamalMessage::from_string::<Sha512>(message);
 
@@ -34,7 +34,7 @@ fn test_encode_message_fail() {
     let message = "Test Message".to_string();
 
     let m_zl = Scalar::hash_from_bytes::<Sha512>(message.as_bytes());
-    let m_group = &m_zl * &curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT;
+    let m_group = m_zl * curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT;
 
     let m = ElGamalMessage::from_string::<Sha512>("Test message".to_string());
 

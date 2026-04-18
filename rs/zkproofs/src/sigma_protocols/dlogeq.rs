@@ -149,8 +149,8 @@ impl SigmaProtocol for DlogEq {
         }
 
         let r = Scalar::random(rng);
-        let c1 = &r * statement.g_1;
-        let c2 = &r * statement.g_2;
+        let c1 = r * statement.g_1;
+        let c2 = r * statement.g_2;
 
         let state = DlogEqProverState(r);
         let commitments = DlogEqCommitment { c1, c2 };
@@ -168,7 +168,7 @@ impl SigmaProtocol for DlogEq {
         challenge: &Challenge,
         state: DlogEqProverState,
     ) -> DlogEqResponse {
-        DlogEqResponse(&state.0 + witness.x * &challenge.0)
+        DlogEqResponse(state.0 + witness.x * challenge.0)
     }
 
     fn check(
@@ -177,11 +177,11 @@ impl SigmaProtocol for DlogEq {
         challenge: &Challenge,
         response: &DlogEqResponse,
     ) -> bool {
-        let g_1s = &statement.g_1 * &response.0;
-        let g_2s = &statement.g_2 * &response.0;
+        let g_1s = statement.g_1 * response.0;
+        let g_2s = statement.g_2 * response.0;
 
-        let g_1v = &commitment.c1 + &statement.h_1 * &challenge.0;
-        let g_2v = &commitment.c2 + &statement.h_2 * &challenge.0;
+        let g_1v = commitment.c1 + statement.h_1 * challenge.0;
+        let g_2v = commitment.c2 + statement.h_2 * challenge.0;
 
         if g_1s == g_1v && g_2s == g_2v {
             return true;
@@ -195,8 +195,8 @@ impl SigmaProtocol for DlogEq {
     ) -> (DlogEqCommitment, DlogEqSimulatorState) {
         let ch = Scalar::random(rng);
         let rsp = Scalar::random(rng);
-        let c1 = &statement.g_1 * &rsp - &statement.h_1 * &ch;
-        let c2 = &statement.g_2 * &rsp - &statement.h_2 * &ch;
+        let c1 = statement.g_1 * rsp - statement.h_1 * ch;
+        let c2 = statement.g_2 * rsp - statement.h_2 * ch;
 
         (
             DlogEqCommitment { c1, c2 },

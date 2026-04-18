@@ -180,7 +180,7 @@ where
     ) -> Result<(Self::COM, Self::ST), Error> {
         match witness {
             OrComposedWitness::WitnessP1(w1) | OrComposedWitness::Both((w1, _)) => {
-                let (c1, st1) = match P1::commit(&statement.s1, &w1, rng) {
+                let (c1, st1) = match P1::commit(&statement.s1, w1, rng) {
                     Ok((com, st)) => (com, st),
                     Err(e) => return Err(e),
                 };
@@ -192,7 +192,7 @@ where
                 ))
             }
             OrComposedWitness::WitnessP2(w2) => {
-                let (c2, st2) = match P2::commit(&statement.s2, &w2, rng) {
+                let (c2, st2) = match P2::commit(&statement.s2, w2, rng) {
                     Ok((com, st)) => (com, st),
                     Err(e) => return Err(e),
                 };

@@ -121,7 +121,7 @@ impl SigmaProtocol for Dlog {
         }
 
         let r = Scalar::random(rng);
-        let c1 = &r * statement.g_1;
+        let c1 = r * statement.g_1;
 
         let state = DlogProverState(r);
         let commitments = DlogCommitment { c1 };
@@ -139,7 +139,7 @@ impl SigmaProtocol for Dlog {
         challenge: &Challenge,
         state: DlogProverState,
     ) -> DlogResponse {
-        DlogResponse(&state.0 + witness.x * &challenge.0)
+        DlogResponse(state.0 + witness.x * challenge.0)
     }
 
     fn check(
@@ -164,7 +164,7 @@ impl SigmaProtocol for Dlog {
     ) -> (DlogCommitment, DlogSimulatorState) {
         let ch = Scalar::random(rng);
         let rsp = Scalar::random(rng);
-        let com = statement.g_1 * rsp - statement.h_1 * &ch;
+        let com = statement.g_1 * rsp - statement.h_1 * ch;
 
         (
             DlogCommitment { c1: com },

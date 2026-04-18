@@ -68,7 +68,7 @@ impl super::PublicKey for ElGamalPublicKey {
     type SK = ElGamalSecretKey;
 
     fn from_secret(secret_key: &ElGamalSecretKey) -> ElGamalPublicKey {
-        ElGamalPublicKey(&secret_key.0 * &curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT)
+        ElGamalPublicKey(secret_key.0 * curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT)
     }
 }
 
@@ -84,10 +84,7 @@ impl super::EncryptionScheme for ElGamal {
         key_len: u32,
         rng: &mut RNG,
     ) -> Result<(ElGamalSecretKey, ElGamalPublicKey), Error> {
-        let sk = match ElGamalSecretKey::generate(key_len, rng) {
-            Ok(key) => key,
-            Err(e) => return Err(e),
-        };
+        let sk = ElGamalSecretKey::generate(key_len, rng)?;
         let pk = ElGamalPublicKey::from_secret(&sk);
         Ok((sk, pk))
     }
@@ -102,7 +99,7 @@ impl super::EncryptionScheme for ElGamal {
 
     fn decrypt(secret_key: &ElGamalSecretKey, ciphertext: ElGamalCiphertext) -> ElGamalMessage {
         let sk_inv = secret_key.0;
-        ElGamalMessage(&ciphertext.1 - (&sk_inv * &ciphertext.0))
+        ElGamalMessage(ciphertext.1 - (sk_inv * ciphertext.0))
     }
 }
 
@@ -113,8 +110,8 @@ impl ElGamal {
         rng: &mut RNG,
     ) -> (ElGamalCiphertext, Scalar) {
         let r = Scalar::random(rng);
-        let c1 = &r * &curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT;
-        let c2 = &message.0 + (&public_key.0 * &r);
+        let c1 = r * curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT;
+        let c2 = message.0 + (public_key.0 * r);
 
         (ElGamalCiphertext(c1, c2), r)
     }
@@ -141,7 +138,7 @@ impl ElGamal {
 impl ElGamalMessage {
     pub fn from_string<D: Digest<OutputSize = U64> + Default>(message: String) -> Self {
         let m_zl = Scalar::hash_from_bytes::<D>(message.as_bytes());
-        let m_group = &m_zl * &curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT;
+        let m_group = m_zl * curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT;
         ElGamalMessage(m_group)
     }
 

@@ -103,8 +103,8 @@ where
 
     fn verify(statement: &Self::S, proof: &Self::P) -> bool {
         let (commitment, response) = SP::unwrap_proof(proof);
-        let ch = SP::hash_challenge(statement, &commitment);
-        SP::check(statement, &commitment, &ch, &response)
+        let ch = SP::hash_challenge(statement, commitment);
+        SP::check(statement, commitment, &ch, response)
     }
 }
 

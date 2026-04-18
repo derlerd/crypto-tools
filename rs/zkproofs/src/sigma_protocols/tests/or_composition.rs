@@ -54,28 +54,27 @@ fn test_bad_witness() {
 #[test]
 fn test_commit_challenge_check() {
     for (x, w) in get_valid_statement_witness_combinations_for_test().iter() {
-        let (com, st) = DlOrDlEq::commit(&x, &w, &mut thread_rng()).expect("Committing failed");
+        let (com, st) = DlOrDlEq::commit(x, w, &mut thread_rng()).expect("Committing failed");
         let ch = DlOrDlEq::challenge(&mut thread_rng());
-        let rsp = DlOrDlEq::response(&x, &w, &ch, st);
+        let rsp = DlOrDlEq::response(x, w, &ch, st);
 
-        assert_eq!(DlOrDlEq::check(&x, &com, &ch, &rsp), true);
+        assert!(DlOrDlEq::check(x, &com, &ch, &rsp));
     }
 }
 
 #[test]
 fn test_response_with_wrong_witness() {
     for (x, w) in get_valid_statement_witness_combinations_for_test().iter() {
-        let (com, st) = DlOrDlEq::commit(&x, &w, &mut thread_rng()).expect("Committing failed");
+        let (com, st) = DlOrDlEq::commit(x, w, &mut thread_rng()).expect("Committing failed");
         let ch = DlOrDlEq::challenge(&mut thread_rng());
 
         for w_rand in get_random_witness_combinations_for_test().iter() {
             let result =
-                std::panic::catch_unwind(|| DlOrDlEq::response(&x, &w_rand, &ch, st.clone()));
+                std::panic::catch_unwind(|| DlOrDlEq::response(x, w_rand, &ch, st.clone()));
 
             match result {
-                Ok(rsp) => assert_eq!(
-                    DlOrDlEq::check(&x, &com, &ch, &rsp),
-                    false,
+                Ok(rsp) => assert!(
+                    !DlOrDlEq::check(x, &com, &ch, &rsp),
                     "Check with response for random well-formed witness failed"
                 ),
                 Err(_) => continue,
@@ -87,12 +86,11 @@ fn test_response_with_wrong_witness() {
 #[test]
 fn test_prove_verify() {
     for (x, w) in get_valid_statement_witness_combinations_for_test().iter() {
-        let p = <DlOrDlEq as FsProofSystem<Sha512>>::prove(&x, &w, &mut thread_rng())
+        let p = <DlOrDlEq as FsProofSystem<Sha512>>::prove(x, w, &mut thread_rng())
             .expect("Proving valid statement failed");
 
-        assert_eq!(
-            <DlOrDlEq as FsProofSystem<Sha512>>::verify(&x, &p),
-            true,
+        assert!(
+            <DlOrDlEq as FsProofSystem<Sha512>>::verify(x, &p),
             "Expected that proof verification succeeds but it failed."
         );
     }
@@ -102,7 +100,7 @@ fn test_prove_verify() {
 fn test_prove_fails() {
     for (x, _w) in get_valid_statement_witness_combinations_for_test().iter() {
         for w in get_random_witness_combinations_for_test().iter() {
-            match <DlOrDlEq as FsProofSystem<Sha512>>::prove(&x, &w, &mut thread_rng()) {
+            match <DlOrDlEq as FsProofSystem<Sha512>>::prove(x, w, &mut thread_rng()) {
                 Err(ZkProofError::InvalidWitness) => continue,
                 _ => panic!(
                     "Call to prove with witness that is invalid for the given statement succeeded."

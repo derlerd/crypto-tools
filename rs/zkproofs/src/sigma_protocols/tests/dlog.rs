@@ -14,7 +14,7 @@ use hashing::Hashable;
 pub(crate) fn create_dlog_statement_for_testing() -> (DlogStatement, DlogWitness) {
     let w = Scalar::random(&mut thread_rng());
     let base = RistrettoPoint::random(&mut thread_rng());
-    let mult = &base * &w;
+    let mult = base * w;
 
     (DlogStatement::new(base, mult), w.into())
 }
@@ -29,7 +29,7 @@ fn hash_statement_for_testing(x: DlogStatement) -> Vec<u8> {
 fn test_valid_statement() {
     let (x, w) = create_dlog_statement_for_testing();
 
-    assert_eq!(x.verify(&w), true);
+    assert!(x.verify(&w));
 }
 
 #[test]
@@ -38,7 +38,7 @@ fn test_invalid_statement() {
 
     let w = Scalar::random(&mut thread_rng());
 
-    assert_eq!(x.verify(&w.into()), false);
+    assert!(!x.verify(&w.into()));
 }
 
 #[test]
@@ -71,7 +71,7 @@ fn test_commit_challenge_response_check() {
     let ch = Dlog::challenge(&mut thread_rng());
     let rsp = Dlog::response(&x, &w, &ch, st);
 
-    assert_eq!(Dlog::check(&x, &com, &ch, &rsp), true);
+    assert!(Dlog::check(&x, &com, &ch, &rsp));
 }
 
 #[test]
@@ -92,5 +92,5 @@ fn test_prove_and_verify() {
     let p =
         <Dlog as FsProofSystem<Sha512>>::prove(&x, &w, &mut thread_rng()).expect("Proving failed");
 
-    assert_eq!(<Dlog as FsProofSystem<Sha512>>::verify(&x, &p), true);
+    assert!(<Dlog as FsProofSystem<Sha512>>::verify(&x, &p));
 }

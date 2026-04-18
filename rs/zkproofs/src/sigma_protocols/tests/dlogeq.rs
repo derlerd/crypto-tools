@@ -15,8 +15,8 @@ pub(crate) fn create_dlogeq_statement_for_testing() -> (DlogEqStatement, DlogEqW
     let w = Scalar::random(&mut thread_rng());
     let base1 = RistrettoPoint::random(&mut thread_rng());
     let base2 = RistrettoPoint::random(&mut thread_rng());
-    let mult1 = &base1 * &w;
-    let mult2 = &base2 * &w;
+    let mult1 = base1 * w;
+    let mult2 = base2 * w;
 
     (DlogEqStatement::new(base1, mult1, base2, mult2), w.into())
 }
@@ -74,7 +74,7 @@ fn test_commit_challenge_response_check() {
     let ch = DlogEq::challenge(&mut thread_rng());
     let rsp = DlogEq::response(&x, &w, &ch, st);
 
-    assert_eq!(DlogEq::check(&x, &com, &ch, &rsp), true);
+    assert!(DlogEq::check(&x, &com, &ch, &rsp));
 }
 
 #[test]
@@ -95,5 +95,5 @@ fn test_prove_and_verify() {
     let p = <DlogEq as FsProofSystem<Sha512>>::prove(&x, &w, &mut thread_rng())
         .expect("Proving failed");
 
-    assert_eq!(<DlogEq as FsProofSystem<Sha512>>::verify(&x, &p), true);
+    assert!(<DlogEq as FsProofSystem<Sha512>>::verify(&x, &p));
 }

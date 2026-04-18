@@ -25,8 +25,8 @@ fn hash_validation_success() {
         DssPkc20::hash(&pk, msg_original.clone(), &mut thread_rng()).expect("Error upon hashing");
     let success = DssPkc20::check(&pk, msg_original.clone(), &r, &h);
 
-    assert_eq!(
-        true, success,
+    assert!(
+        success,
         "Hash validation failed: expected {} got {}.",
         true, success
     );
@@ -44,8 +44,8 @@ fn hash_validation_failure() {
 
     let success = DssPkc20::check(&pk, msg.clone(), &r, &h);
 
-    assert_eq!(
-        false, success,
+    assert!(
+        !success,
         "Hash validation failed: expected {} got {}.",
         false, success
     );
@@ -64,8 +64,8 @@ fn hash_adapt_success() {
         .expect("Error upon adapting");
     let success = DssPkc20::check(&pk, msg_adapted.clone(), &r_adapt, &h);
 
-    assert_eq!(
-        true, success,
+    assert!(
+        success,
         "Hash validation after adapt failed: expected {} got {}.",
         true, success
     );
