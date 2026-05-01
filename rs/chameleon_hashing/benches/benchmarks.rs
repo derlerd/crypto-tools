@@ -3,10 +3,8 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use rand::thread_rng;
 use sha2::Sha512;
 
-use modern_crypto_tools::{
-    chameleon_hashing::{dss_pkc_20::DssPkc20, ChameleonHash},
-    encryption::elgamal::ElGamalMessage,
-};
+use chameleon_hashing::{dss_pkc_20::DssPkc20, ChameleonHash};
+use encryption::elgamal::ElGamalMessage;
 
 pub fn bench_keygen(c: &mut Criterion) {
     c.bench_function("dss_20_key_gen", |b| {

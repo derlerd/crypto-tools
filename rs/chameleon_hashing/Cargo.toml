@@ -13,7 +13,13 @@ digest = { workspace = true }
 
 [dev-dependencies]
 rand = { workspace = true }
+criterion = "0.8.2"
 
 [lib]
 name = "chameleon_hashing"
 path = "src/lib.rs"
+
+[[bench]]
+name = "chameleon_hashing_benchmarks"
+path = "benches/benchmarks.rs"
+harness = false
