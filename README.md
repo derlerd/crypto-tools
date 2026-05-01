@@ -1,6 +1,6 @@
-# Modern Crypto Tools
+# Crypto Tools
 
-The goal of this library is to provide efficient and easy to use implementations of various modern cryptographic tools. We put a special focus on getting abstractions right in the sense that generic transformations known from the cryptographic literature can also be generically implemented. This minimizes (1) the amount of code that needs to be written to add an implementation of a new scheme, as well as (2) the potential to introduce errors when implementing the same "generic" transformations individually for every scheme. 
+The goal of this library is to provide efficient and easy to use implementations for prototyping cryptographic implementations. We put a special focus on abstractions in the sense that generic transformations known from the cryptographic literature are generically implemented. This minimizes (1) the amount of code that needs to be written to add an implementation of a new scheme, as well as (2) the potential to introduce errors when implementing the same "generic" transformations individually for every scheme.
 
 _WARNING: This code is currently work in progress and not intended for production use!_
 
@@ -17,19 +17,19 @@ Note that we currently fix the [Ristretto group](https://ristretto.group/) as th
 
 ## Implementations 
 
-- An implementation of the `digest::Digest` trait that enforces that every digest includes a domain separator in the hash.
+- The `Hash` and `Hashable` traits provide several convenience methods for domain separated hashing.
 - Sigma protocols for proving knowledge of the following:
   - A discrete logarithm `x` relative to two group elements `(g, h)` so that `h = g^x`.    
   - A discrete logarithm `x` relative to four group elements `(g, h, g', h')` so that `h = g^x ∧ h' = g'^x`.
 - A generic implementation of the OR composition of two Sigma protocols.
 - A generic implementation turning every Sigma protocol that implements the `FsConvertibleSigmaProtocol` trait into a `FsProofSystem`, i.e., generically applies the [Fiat-Shamir](https://doi.org/10.1007%2F3-540-68339-9_33) transform and additionally includes the statement in the hash when obtaining the challenge for stronger non-malleability guarantees [FMKV'12](https://eprint.iacr.org/2012/704.pdf).
-- [ElGamal](https://doi.org/10.1007%2FBFb0054851) encryption 
+- [ElGamal](https://doi.org/10.1007%2FBFb0054851) encryption. 
 - Fully collision resistant chameleon hashes from [this paper](https://eprint.iacr.org/2020/403.pdf). 
 
 ## TODO 
 
 A non-exhaustive list of open TODOs and other future plans can be found below:
 
-- Abstract out groups so that implementation is generic over which groups are used
+- Abstract groups so that implementation is generic over which groups are used
 - Serialization and deserialization logic
 - In-depth review
