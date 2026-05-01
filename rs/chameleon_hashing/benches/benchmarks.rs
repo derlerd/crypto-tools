@@ -1,9 +1,9 @@
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, criterion_group, criterion_main};
 
 use rand::thread_rng;
 use sha2::Sha512;
 
-use chameleon_hashing::{dss_pkc_20::DssPkc20, ChameleonHash};
+use chameleon_hashing::{ChameleonHash, dss_pkc_20::DssPkc20};
 use encryption::elgamal::ElGamalMessage;
 
 pub fn bench_keygen(c: &mut Criterion) {

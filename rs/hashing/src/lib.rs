@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests;
 
-use digest::Digest;
+use digest::{Digest, Reset};
 
 pub struct DomainSeparator {
     bytes: Vec<u8>,
@@ -21,6 +21,9 @@ pub trait Hashable<H: Hash> {
 
 pub trait Hash: Digest {
     fn new_with_separator(domain_separator: DomainSeparator) -> Self;
+    fn reset_with_separator(&mut self, domain_separator: DomainSeparator)
+    where
+        Self: Reset;
 }
 
 impl<D: Digest> Hash for D {
@@ -28,6 +31,14 @@ impl<D: Digest> Hash for D {
         let mut hash = D::new();
         hash.update(domain_separator);
         hash
+    }
+
+    fn reset_with_separator(&mut self, domain_separator: DomainSeparator)
+    where
+        Self: Reset,
+    {
+        digest::Reset::reset(self);
+        self.update(domain_separator);
     }
 }
 
