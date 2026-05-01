@@ -29,7 +29,7 @@ pub trait Hash: Digest {
     where
         Self: FixedOutputReset;
 
-    /// Similar to `Digest::finalize_into_reset`, but updates the digest with 
+    /// Similar to `Digest::finalize_into_reset`, but updates the digest with
     /// `domain_separator`
     fn finalize_into_reset_with_separator(
         &mut self,
